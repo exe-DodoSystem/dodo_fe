@@ -1,0 +1,21 @@
+.module-modal-overlay {
+    background-color: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+}
+
+.module-modal {
+    font-family: 'Montserrat', sans-serif;
+}
+
+.module-modal .font-inter {
+    font-family: 'Inter', sans-serif;
+}
+
+.module-modal .feature-item {
+    transition: all 0.2s ease;
+}
+
+.module-modal .feature-item:hover {
+    border-color: #1d6ced;
+    background-color: #f8fafc;
+}

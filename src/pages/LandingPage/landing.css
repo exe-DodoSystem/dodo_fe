@@ -1,0 +1,55 @@
+
+.landing-page {
+    --primary: #1d6ced;
+    --primary-dark: #1656c2;
+    --bg-light: #f9fafb;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    font-family: 'Montserrat', sans-serif;
+    background-color: var(--bg-light);
+    color: var(--text-main);
+}
+.landing-page .font-inter {
+    font-family: 'Inter', sans-serif;
+}
+.landing-page .module-card {
+    transition: all 0.2s ease;
+    cursor: pointer;
+    position: relative;
+}
+.landing-page .module-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--primary);
+}
+.landing-page .module-card.selected {
+    border-color: var(--primary);
+    background-color: #f0f7ff;
+}
+.landing-page .hero-overlay {
+    background: linear-gradient(to bottom, rgba(15, 23, 42, 0.85), rgba(29, 108, 237, 0.4));
+}
+.landing-page .custom-checkbox {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #cbd5e1;
+    border-radius: 4px;
+    background-color: white;
+    display: inline-block;
+    position: relative;
+    cursor: pointer;
+}
+.landing-page .custom-checkbox:checked {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+.landing-page .custom-checkbox:checked::after {
+    content: 'check';
+    font-family: 'Material Symbols Outlined';
+    font-size: 16px;
+    color: white;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
