@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import ModuleModal from "../../components/ModuleModal";
 import "./landing.css";
@@ -70,7 +70,7 @@ export default function LandingPage() {
   return (
     <div className="landing-page min-h-screen flex flex-col">
       <header className="sticky top-0 z-50 w-full border-b border-gray-100 bg-white/90 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="px-6 lg:px-12">
           <div className="flex h-20 items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="flex items-center justify-center size-10 bg-[var(--primary)] rounded-xl text-white shadow-lg shadow-blue-200">
@@ -84,8 +84,8 @@ export default function LandingPage() {
             </div>
             <nav className="hidden md:flex items-center gap-10">
               <a
-                className="text-sm font-semibold text-slate-600 hover:text-[var(--primary)] transition-colors"
-                href="#"
+                className="text-sm font-semibold text-slate-600 hover:text-[var(--primary)] transition-colors cursor-pointer"
+                onClick={() => navigate('/products')}
               >
                 Sản phẩm
               </a>
@@ -109,8 +109,8 @@ export default function LandingPage() {
               </a>
             </nav>
             <div className="flex items-center gap-4">
-              <button onClick={() => navigate('/login')} 
-              className="px-6 py-2.5 text-sm font-bold text-[var(--primary)] hover:bg-blue-50 rounded-lg transition-colors">
+              <button onClick={() => navigate('/login')}
+                className="px-6 py-2.5 text-sm font-bold text-[var(--primary)] hover:bg-blue-50 rounded-lg transition-colors">
                 Đăng nhập
               </button>
               <button className="px-6 py-2.5 text-sm font-bold bg-[var(--primary)] text-white rounded-lg hover:bg-[var(--primary-dark)] transition-colors shadow-md shadow-blue-100">
@@ -122,8 +122,8 @@ export default function LandingPage() {
       </header>
 
       <main className="flex-1">
-        <section className="pt-10 pb-20 px-4">
-          <div className="max-w-7xl mx-auto">
+        <section className="pt-10 pb-20 px-6 lg:px-12">
+          <div>
             <div className="relative w-full rounded-[3rem] overflow-hidden min-h-[550px] flex items-center justify-center text-center px-6">
               <div
                 className="absolute inset-0 bg-cover bg-center"
@@ -158,8 +158,8 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="pb-24 px-4">
-          <div className="max-w-7xl mx-auto">
+        <section className="pb-24 px-6 lg:px-12">
+          <div>
             <div className="text-center mb-12">
               <h2 className="text-3xl font-extrabold text-slate-900 mb-4">
                 Tùy chỉnh hệ thống theo nhu cầu
@@ -180,7 +180,7 @@ export default function LandingPage() {
                   <div className="absolute top-4 right-4">
                     <input
                       checked={selectedModules.includes(module.id)}
-                      onChange={() => {}}
+                      onChange={() => { }}
                       className="custom-checkbox"
                       type="checkbox"
                     />
@@ -237,8 +237,8 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="py-24 px-4 bg-white">
-          <div className="max-w-7xl mx-auto">
+        <section className="py-24 px-6 lg:px-12 bg-white">
+          <div>
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900">
                 Tại sao chọn DODO ?
@@ -286,8 +286,8 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="py-20 px-4">
-          <div className="max-w-7xl mx-auto">
+        <section className="py-20 px-6 lg:px-12">
+          <div>
             <div className="relative overflow-hidden bg-gradient-to-br from-blue-500 to-[var(--primary-dark)] rounded-[2rem] p-12 md:p-20 text-center text-white shadow-2xl">
               <div className="relative z-10">
                 <h2 className="text-3xl md:text-5xl font-extrabold mb-8 leading-tight">
@@ -312,7 +312,7 @@ export default function LandingPage() {
       </main>
 
       <footer className="bg-white border-t border-gray-100 pt-16 pb-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="px-6 lg:px-12">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
             <div className="col-span-1 md:col-span-1">
               <div className="flex items-center gap-2 mb-6">
