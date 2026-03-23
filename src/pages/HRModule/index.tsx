@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./hr.css";
+import AddStaffModal from "./components/AddStaffModal";
 
 const features = [
     {
@@ -37,28 +38,35 @@ interface Employee {
     id: number;
     name: string;
     email: string;
-    role: "Admin" | "Manager" | "Member";
-    status: "Active" | "Inactive";
+    position: string;
+    department: "Engineering" | "HR" | "Design" | "Marketing" | "Sales";
+    status: "Active" | "Inactive" | "On Leave";
     avatarColor: string;
 }
 
 const employees: Employee[] = [
-    { id: 1, name: "Nguyễn Văn A", email: "nguyenvana@dodo.vn", role: "Admin", status: "Active", avatarColor: "#1d6ced" },
-    { id: 2, name: "Trần Thị B", email: "trantthib@dodo.vn", role: "Manager", status: "Active", avatarColor: "#ef4444" },
-    { id: 3, name: "Lê Văn C", email: "levanc@dodo.vn", role: "Member", status: "Inactive", avatarColor: "#f59e0b" },
-    { id: 4, name: "Phạm Thị D", email: "phamthid@dodo.vn", role: "Member", status: "Active", avatarColor: "#8b5cf6" },
-    { id: 5, name: "Hoàng Văn E", email: "hoangvane@dodo.vn", role: "Member", status: "Active", avatarColor: "#10b981" },
+    { id: 1, name: "Nguyễn Văn A", email: "a.nguyen@dodo.com", position: "Senior Developer", department: "Engineering", status: "Active", avatarColor: "#1d6ced" },
+    { id: 2, name: "Trần Thị B", email: "b.tran@dodo.com", position: "HR Manager", department: "HR", status: "Inactive", avatarColor: "#db2777" },
+    { id: 3, name: "Lê Văn C", email: "c.le@dodo.com", position: "Product Designer", department: "Design", status: "Active", avatarColor: "#2563eb" },
+    { id: 4, name: "Phạm Thị D", email: "d.pham@dodo.com", position: "Marketing Lead", department: "Marketing", status: "On Leave", avatarColor: "#d97706" },
+    { id: 5, name: "Hoàng Văn E", email: "e.hoang@dodo.com", position: "Sales Executive", department: "Sales", status: "Active", avatarColor: "#16a34a" },
+    { id: 6, name: "Bùi Văn F", email: "f.bui@dodo.com", position: "DevOps Engineer", department: "Engineering", status: "Active", avatarColor: "#7c3aed" },
 ];
 
 export default function HRModule() {
     const navigate = useNavigate();
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+    const openAddModal = () => setIsAddModalOpen(true);
+    const closeAddModal = () => setIsAddModalOpen(false);
 
     const filteredEmployees = employees.filter(
         (e) =>
-            e.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            e.email.toLowerCase().includes(searchTerm.toLowerCase())
+            (e.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            e.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            e.position.toLowerCase().includes(searchTerm.toLowerCase()))
     );
 
     return (
@@ -102,13 +110,16 @@ export default function HRModule() {
                 <section className="hr-hero py-16 px-6 lg:px-12">
                     <div className="text-center relative z-10">
                         <h1 className="text-3xl md:text-5xl font-extrabold text-slate-900 mb-5 leading-tight">
-                            Quản lý người dùng<br />doanh nghiệp
+                            Quản lý nhân viên hiệu quả &<br />đồng bộ
                         </h1>
                         <p className="text-base md:text-lg text-[var(--text-muted)] font-inter max-w-2xl mx-auto mb-10 leading-relaxed">
-                            Tạo, phân quyền và kiểm soát tài khoản nhân sự hiệu quả với hệ thống bảo mật hàng đầu. Giảm thiểu rủi ro và tối ưu hóa quy trình làm việc.
+                            Quản lý toàn bộ hồ sơ nhân viên một cách dễ dàng và chuyên nghiệp. Nền tảng nhân sự số 1 cho doanh nghiệp hiện đại.
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                            <button className="px-8 py-3.5 bg-[var(--primary)] text-white font-bold rounded-full hover:bg-[var(--primary-dark)] transition-all shadow-lg shadow-blue-200/50 flex items-center gap-2 justify-center">
+                            <button 
+                                onClick={openAddModal}
+                                className="px-8 py-3.5 bg-[var(--primary)] text-white font-bold rounded-full hover:bg-[var(--primary-dark)] transition-all shadow-lg shadow-blue-200/50 flex items-center gap-2 justify-center"
+                            >
                                 <span className="material-symbols-outlined text-xl">person_add</span>
                                 Thêm nhân sự
                             </button>
@@ -147,7 +158,10 @@ export default function HRModule() {
                 <section className="pb-16 px-6 lg:px-12">
                     <div>
                         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
-                            <h2 className="text-2xl font-extrabold text-slate-900">Danh sách nhân sự</h2>
+                            <div>
+                                <h2 className="text-2xl font-extrabold text-slate-900">Danh sách nhân viên</h2>
+                                <p className="text-sm text-slate-500 font-inter">Quản lý danh sách và thông tin chi tiết</p>
+                            </div>
                             <div className="flex items-center gap-3 w-full sm:w-auto">
                                 <div className="relative flex-1 sm:flex-none">
                                     <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl">search</span>
@@ -162,7 +176,10 @@ export default function HRModule() {
                                 <button className="hr-action-btn !w-10 !h-10 !rounded-xl">
                                     <span className="material-symbols-outlined text-xl">filter_list</span>
                                 </button>
-                                <button className="px-5 py-2.5 bg-[var(--primary)] text-white font-bold rounded-xl hover:bg-[var(--primary-dark)] transition-colors text-sm flex items-center gap-2 shadow-sm whitespace-nowrap">
+                                <button 
+                                    onClick={openAddModal}
+                                    className="px-5 py-2.5 bg-[var(--primary)] text-white font-bold rounded-xl hover:bg-[var(--primary-dark)] transition-colors text-sm flex items-center gap-2 shadow-sm whitespace-nowrap"
+                                >
                                     <span className="material-symbols-outlined text-lg">add</span>
                                     Thêm nhân sự
                                 </button>
@@ -174,11 +191,12 @@ export default function HRModule() {
                                 <table className="hr-table w-full text-left">
                                     <thead>
                                         <tr>
-                                            <th>Họ tên</th>
+                                            <th>Full Name</th>
                                             <th>Email</th>
-                                            <th>Vai trò</th>
-                                            <th>Trạng thái</th>
-                                            <th className="text-right">Hành động</th>
+                                            <th>Position</th>
+                                            <th>Department</th>
+                                            <th>Status</th>
+                                            <th className="text-right">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -189,29 +207,28 @@ export default function HRModule() {
                                                         <div className="hr-avatar" style={{ backgroundColor: emp.avatarColor }}>
                                                             {emp.name.charAt(0)}
                                                         </div>
-                                                        <span className="font-semibold text-slate-900" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+                                                        <span className="font-semibold text-slate-900">
                                                             {emp.name}
                                                         </span>
                                                     </div>
                                                 </td>
-                                                <td className="text-slate-500">{emp.email}</td>
+                                                <td className="text-slate-500 font-inter">{emp.email}</td>
+                                                <td className="text-slate-700 font-inter font-medium">{emp.position}</td>
                                                 <td>
-                                                    <span className={`hr-badge ${emp.role === "Admin" ? "hr-badge-admin" : emp.role === "Manager" ? "hr-badge-manager" : "hr-badge-member"}`}>
-                                                        {emp.role}
+                                                    <span className={`hr-badge hr-dept-${emp.department.toLowerCase()}`}>
+                                                        {emp.department}
                                                     </span>
                                                 </td>
                                                 <td>
-                                                    <span className={`hr-badge ${emp.status === "Active" ? "hr-status-active" : "hr-status-inactive"}`}>
-                                                        • {emp.status}
-                                                    </span>
+                                                    <div className={`hr-status-badge ${emp.status === "Active" ? "hr-status-active" : emp.status === "Inactive" ? "hr-status-inactive" : "hr-status-leave"}`}>
+                                                        <div className="hr-status-dot"></div>
+                                                        {emp.status}
+                                                    </div>
                                                 </td>
                                                 <td>
                                                     <div className="flex items-center gap-2 justify-end">
-                                                        <button className="hr-action-btn" title="Chỉnh sửa">
-                                                            <span className="material-symbols-outlined text-lg">edit</span>
-                                                        </button>
-                                                        <button className="hr-action-btn" title="Xóa">
-                                                            <span className="material-symbols-outlined text-lg">delete</span>
+                                                        <button className="text-slate-400 hover:text-[var(--primary)] transition-colors">
+                                                            <span className="material-symbols-outlined text-xl">edit_square</span>
                                                         </button>
                                                     </div>
                                                 </td>
@@ -248,6 +265,11 @@ export default function HRModule() {
                     </div>
                 </section>
             </main>
+
+            <AddStaffModal 
+                isOpen={isAddModalOpen} 
+                onClose={closeAddModal} 
+            />
         </div>
     );
 }

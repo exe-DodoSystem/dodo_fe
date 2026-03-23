@@ -102,38 +102,45 @@
 .hr-badge {
     display: inline-flex;
     align-items: center;
-    padding: 4px 12px;
+    padding: 6px 14px;
     border-radius: 9999px;
     font-size: 0.75rem;
+    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+    letter-spacing: -0.01em;
+}
+
+/* Departments */
+.hr-dept-engineering { background-color: #f5f3ff; color: #7c3aed; }
+.hr-dept-hr { background-color: #fdf2f8; color: #db2777; }
+.hr-dept-design { background-color: #eff6ff; color: #2563eb; }
+.hr-dept-marketing { background-color: #fffbeb; color: #d97706; }
+.hr-dept-sales { background-color: #f0fdf4; color: #16a34a; }
+
+/* Statuses */
+.hr-status-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
     font-weight: 600;
     font-family: 'Inter', sans-serif;
 }
 
-.hr-badge-admin {
-    background-color: #1d6ced;
-    color: white;
+.hr-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
 }
 
-.hr-badge-manager {
-    background-color: #7c3aed;
-    color: white;
-}
+.hr-status-active .hr-status-dot { background-color: #16a34a; }
+.hr-status-active { color: #16a34a; }
 
-.hr-badge-member {
-    background-color: transparent;
-    color: #64748b;
-    font-weight: 500;
-}
+.hr-status-inactive .hr-status-dot { background-color: #94a3b8; }
+.hr-status-inactive { color: #64748b; }
 
-.hr-status-active {
-    background-color: #dcfce7;
-    color: #16a34a;
-}
-
-.hr-status-inactive {
-    background-color: #f1f5f9;
-    color: #94a3b8;
-}
+.hr-status-leave .hr-status-dot { background-color: #f59e0b; }
+.hr-status-leave { color: #d97706; }
 
 /* Action buttons */
 .hr-action-btn {

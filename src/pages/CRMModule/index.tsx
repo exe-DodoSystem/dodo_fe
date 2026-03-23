@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./crm.css";
+import AddCustomerModal from "./components/AddCustomerModal";
 
 interface Customer {
     id: number;
@@ -30,6 +31,10 @@ export default function CRMModule() {
     const navigate = useNavigate();
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+    const openAddModal = () => setIsAddModalOpen(true);
+    const closeAddModal = () => setIsAddModalOpen(false);
 
     const filteredCustomers = customers.filter(
         (c) =>
@@ -81,7 +86,10 @@ export default function CRMModule() {
                                 <span className="material-symbols-outlined text-lg">download</span>
                                 Xuất dữ liệu
                             </button>
-                            <button className="px-5 py-2.5 bg-[var(--primary)] text-white font-bold rounded-xl hover:bg-[var(--primary-dark)] transition-colors text-sm flex items-center gap-2 shadow-sm">
+                            <button 
+                                onClick={openAddModal}
+                                className="px-5 py-2.5 bg-[var(--primary)] text-white font-bold rounded-xl hover:bg-[var(--primary-dark)] transition-colors text-sm flex items-center gap-2 shadow-sm"
+                            >
                                 <span className="material-symbols-outlined text-lg">add</span>
                                 Thêm khách hàng
                             </button>
@@ -211,6 +219,8 @@ export default function CRMModule() {
                     </div>
                 </div>
             </main>
+
+            <AddCustomerModal isOpen={isAddModalOpen} onClose={closeAddModal} />
         </div>
     );
 }
