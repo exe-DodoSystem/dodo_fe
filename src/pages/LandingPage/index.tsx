@@ -5,55 +5,37 @@ import "./landing.css";
 
 export default function LandingPage() {
   const navigate = useNavigate();
-  const [selectedModules, setSelectedModules] = useState<number[]>([0, 1, 6]);
+  const [selectedModules, setSelectedModules] = useState<number[]>([1, 2]);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const modules = [
     {
-      id: 0,
-      title: "Quản lý Nhân sự (HR)",
-      desc: "Số hóa hồ sơ nhân sự và quy trình tuyển dụng chuyên nghiệp.",
+      id: 1,
+      title: "Nhân sự (HR)",
+      desc: "Quản lý nhân sự cơ bản — hồ sơ, hợp đồng, phân quyền.",
       icon: "badge",
     },
     {
-      id: 1,
-      title: "Chấm công (Attendance)",
-      desc: "Chấm công đa hình thức qua GPS, Wifi hoặc khuôn mặt.",
+      id: 2,
+      title: "Chấm công",
+      desc: "Chấm công đa hình thức: GPS, Wifi, khuôn mặt. Tính lương tự động.",
       icon: "calendar_month",
     },
     {
-      id: 2,
-      title: "Quản lý Khách hàng (CRM)",
-      desc: "Tối ưu hóa phễu bán hàng và chăm sóc khách hàng toàn diện.",
+      id: 3,
+      title: "Sales & CRM",
+      desc: "Quản lý khách hàng, đơn hàng và phễu bán hàng toàn diện.",
       icon: "groups",
     },
     {
-      id: 3,
-      title: "Quản lý Đơn hàng",
-      desc: "Theo dõi lộ trình đơn hàng từ lúc đặt đến khi hoàn tất.",
-      icon: "shopping_cart",
-    },
-    {
       id: 4,
-      title: "Quản lý Kho hàng",
-      desc: "Kiểm soát tồn kho thời gian thực, cảnh báo xuất nhập kho.",
-      icon: "inventory_2",
-    },
-    {
-      id: 5,
-      title: "Tính lương (Payroll)",
-      desc: "Tự động hóa bảng lương, thuế và các khoản bảo hiểm.",
-      icon: "payments",
-    },
-    {
-      id: 6,
-      title: "Công việc & Dự án",
+      title: "Quản lý công việc",
       desc: "Giao việc, theo dõi tiến độ và báo cáo hiệu suất tức thì.",
       icon: "assignment",
     },
     {
-      id: 7,
-      title: "Báo cáo & Phân tích",
+      id: 5,
+      title: "Dashboard & Báo cáo",
       desc: "Hệ thống Dashboard trực quan hỗ trợ ra quyết định nhanh.",
       icon: "monitoring",
     },
@@ -65,7 +47,8 @@ export default function LandingPage() {
     );
   };
 
-  const price = selectedModules.length * 5;
+  const MODULE_PRICES: Record<number, number> = { 1: 150000, 2: 180000, 3: 180000, 4: 150000, 5: 120000 };
+  const price = selectedModules.reduce((sum, id) => sum + (MODULE_PRICES[id] ?? 0), 0);
 
   return (
     <div className="landing-page min-h-screen flex flex-col">
@@ -113,7 +96,10 @@ export default function LandingPage() {
                 className="px-6 py-2.5 text-sm font-bold text-[var(--primary)] hover:bg-blue-50 rounded-lg transition-colors">
                 Đăng nhập
               </button>
-              <button className="px-6 py-2.5 text-sm font-bold bg-[var(--primary)] text-white rounded-lg hover:bg-[var(--primary-dark)] transition-colors shadow-md shadow-blue-100">
+              <button
+                onClick={() => navigate('/register')}
+                className="px-6 py-2.5 text-sm font-bold bg-[var(--primary)] text-white rounded-lg hover:bg-[var(--primary-dark)] transition-colors shadow-md shadow-blue-100"
+              >
                 Dùng thử miễn phí
               </button>
             </div>
@@ -226,11 +212,14 @@ export default function LandingPage() {
                     Giá dự kiến
                   </p>
                   <p className="text-2xl font-extrabold text-blue-400">
-                    ${price}/tháng
+                    {price.toLocaleString('vi-VN')} ₫/tháng
                   </p>
                 </div>
               </div>
-              <button className="w-full sm:w-auto px-10 py-4 bg-[var(--primary)] text-white font-bold rounded-xl hover:bg-blue-600 transition-all shadow-lg shadow-blue-500/20">
+              <button
+                onClick={() => navigate('/register', { state: { moduleIds: selectedModules } })}
+                className="w-full sm:w-auto px-10 py-4 bg-[var(--primary)] text-white font-bold rounded-xl hover:bg-blue-600 transition-all shadow-lg shadow-blue-500/20"
+              >
                 Bắt đầu dùng thử
               </button>
             </div>

@@ -70,41 +70,7 @@ export default function HRModule() {
     );
 
     return (
-        <div className="hr-module min-h-screen flex flex-col">
-            {/* Header */}
-            <header className="sticky top-0 z-50 w-full border-b border-gray-100 bg-white/90 backdrop-blur-md">
-                <div className="px-6 lg:px-12">
-                    <div className="flex h-16 items-center justify-between">
-                        <div
-                            className="flex items-center gap-3 cursor-pointer"
-                            onClick={() => navigate("/")}
-                        >
-                            <div className="flex items-center justify-center size-9 bg-[var(--primary)] rounded-xl text-white shadow-lg shadow-blue-200">
-                                <span className="material-symbols-outlined text-xl">deployed_code</span>
-                            </div>
-                            <span className="text-xl font-extrabold tracking-tight text-slate-900">
-                                DODO <span className="text-[var(--primary)]">System</span>
-                            </span>
-                        </div>
-                        <nav className="hidden md:flex items-center gap-8">
-                            <a onClick={() => navigate("/products")} className="text-sm font-semibold text-[var(--primary)] cursor-pointer">
-                                Sản phẩm
-                            </a>
-                            <span className="text-slate-300">›</span>
-                            <span className="text-sm font-semibold text-slate-900">Nhân sự (HR)</span>
-                        </nav>
-                        <div className="flex items-center gap-3">
-                            <button
-                                onClick={() => navigate("/login")}
-                                className="px-5 py-2 text-sm font-bold text-[var(--primary)] hover:bg-blue-50 rounded-lg transition-colors"
-                            >
-                                Đăng nhập
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </header>
-
+        <div className="hr-module">
             <main className="flex-1">
                 {/* Hero Section */}
                 <section className="hr-hero py-16 px-6 lg:px-12">
@@ -227,7 +193,11 @@ export default function HRModule() {
                                                 </td>
                                                 <td>
                                                     <div className="flex items-center gap-2 justify-end">
-                                                        <button className="text-slate-400 hover:text-[var(--primary)] transition-colors">
+                                                        <button
+                                                            className="text-slate-400 hover:text-[var(--primary)] transition-colors"
+                                                            title="Chỉnh sửa nhân viên"
+                                                            onClick={() => navigate(`/app/hr/edit/${emp.id}`)}
+                                                        >
                                                             <span className="material-symbols-outlined text-xl">edit_square</span>
                                                         </button>
                                                     </div>
