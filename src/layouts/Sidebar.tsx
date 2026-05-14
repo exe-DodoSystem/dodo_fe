@@ -103,10 +103,19 @@ export default function Sidebar() {
           </>
         )}
 
-        {/* Settings (TenantAdmin only) */}
+        {/* Settings + Module Manager (TenantAdmin only) */}
         {isTenantAdmin && (
           <>
             <div className="sidebar-divider" style={{ marginTop: 8 }} />
+            <NavLink
+              to="/app/modules"
+              className={({ isActive }) =>
+                `sidebar-nav-item${isActive ? ' active' : ''}`
+              }
+            >
+              <span className="material-symbols-outlined sidebar-nav-icon">extension</span>
+              Quản lý Module
+            </NavLink>
             <NavLink
               to="/app/settings"
               className={({ isActive }) =>

@@ -1,16 +1,10 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
-
-// Public pages
 import LandingPage from '../pages/LandingPage';
 import LoginPage from '../pages/LoginPage';
 import RegisterPage from '../pages/RegisterPage';
 import ProductsPage from '../pages/ProductsPage';
-
-// Layout & Guards
 import AppLayout from '../layouts/AppLayout';
 import ProtectedRoute from './ProtectedRoute';
-
-// App pages
 import DashboardPage from '../pages/DashboardPage';
 import HRModule from '../pages/HRModule';
 import EditEmployeePage from '../pages/HRModule/components/EditEmployeePage';
@@ -19,17 +13,16 @@ import CRMModule from '../pages/CRMModule';
 import CustomerDetailPage from '../pages/CRMModule/components/CustomerDetailPage';
 import EditCustomerPage from '../pages/CRMModule/components/EditCustomerPage';
 import InventoryModule from '../pages/InventoryModule';
+import ModuleManagerPage from '../pages/ModuleManagerPage';
 
 export default function AppRoutes() {
   return (
     <Routes>
-      {/* ── Public ────────────────────────────── */}
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/products" element={<ProductsPage />} />
 
-      {/* ── Protected (requires login) ─────────── */}
       <Route
         path="/app"
         element={
@@ -47,9 +40,8 @@ export default function AppRoutes() {
         <Route path="crm/:id" element={<CustomerDetailPage />} />
         <Route path="crm/edit/:id" element={<EditCustomerPage />} />
         <Route path="inventory" element={<InventoryModule />} />
+        <Route path="modules" element={<ModuleManagerPage />} />
       </Route>
-
-      {/* Fallback */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

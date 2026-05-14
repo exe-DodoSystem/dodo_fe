@@ -1,12 +1,11 @@
 export type Role = 'TenantAdmin' | 'Manager' | 'Employee';
 
-// 5 modules thực tế từ backend
 export type ModuleId =
-  | 'hr'          // id: 1 — Quản lý nhân sự
-  | 'attendance'  // id: 2 — Chấm công & Tính lương
-  | 'sales'       // id: 3 — Quản lý khách hàng & Đơn hàng
-  | 'tasks'       // id: 4 — Quản lý công việc
-  | 'dashboard';  // id: 5 — Dashboard & Báo cáo
+  | 'hr'
+  | 'attendance'
+  | 'sales'
+  | 'tasks'
+  | 'dashboard';
 
 export interface User {
   id: number;
@@ -22,12 +21,13 @@ export interface User {
 export interface Tenant {
   id: number;
   name: string;
-  purchasedModules: ModuleId[];
+  purchasedModules: ModuleId[]; // Active + Trial (non-expired)
+  trialModules: ModuleId[];     // Only status === "Trial"
 }
 
 export interface ModuleDefinition {
   id: ModuleId;
-  numericId: number; // ID số từ backend (dùng khi gọi API)
+  numericId: number;
   label: string;
   icon: string;
   path: string;
@@ -89,7 +89,6 @@ export const ALL_MODULES: ModuleDefinition[] = [
   },
 ];
 
-// Mapping từ moduleId số (API) → ModuleId string (frontend)
 export const MODULE_ID_MAP: Record<number, ModuleId> = {
   1: 'hr',
   2: 'attendance',
@@ -98,9 +97,8 @@ export const MODULE_ID_MAP: Record<number, ModuleId> = {
   5: 'dashboard',
 };
 
-// Which modules each role is ALLOWED to see (if purchased by tenant)
 export const ROLE_MODULE_ACCESS: Record<Role, ModuleId[]> = {
   TenantAdmin: ['hr', 'attendance', 'sales', 'tasks', 'dashboard'],
-  Manager:     ['hr', 'attendance', 'sales', 'tasks'],
-  Employee:    ['attendance', 'tasks'],
+  Manager: ['hr', 'attendance', 'sales', 'tasks'],
+  Employee: ['attendance', 'tasks'],
 };

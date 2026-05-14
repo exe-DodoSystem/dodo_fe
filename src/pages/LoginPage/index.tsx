@@ -7,14 +7,11 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { login } = useAuth();
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-
-  // After login, go back to intended page or dashboard
   const from = (location.state as { from?: { pathname: string } })?.from?.pathname || "/app/dashboard";
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -32,7 +29,6 @@ export default function LoginPage() {
 
   return (
     <div className="login-page min-h-screen w-full flex flex-col overflow-x-hidden">
-      {/* Header */}
       <header className="w-full bg-white h-20 flex items-center justify-between px-8 shadow-sm">
         <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate("/")}>
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -136,34 +132,6 @@ export default function LoginPage() {
               </a>
             </p>
           </div>
-        </div>
-
-        {/* Demo credentials hint */}
-        <div className="hidden lg:block bg-slate-900 text-white rounded-2xl p-8 w-72">
-          <div className="flex items-center gap-2 mb-6">
-            <span className="material-symbols-outlined text-blue-400">info</span>
-            <span className="font-bold text-sm font-montserrat">Tài khoản demo</span>
-          </div>
-          <div className="space-y-4">
-            {[
-              { role: 'TenantAdmin', email: 'admin@dodo.vn', color: '#60a5fa' },
-              { role: 'Manager', email: 'manager@dodo.vn', color: '#a78bfa' },
-              { role: 'Employee', email: 'employee@dodo.vn', color: '#94a3b8' },
-            ].map((u) => (
-              <button
-                key={u.role}
-                type="button"
-                onClick={() => { setEmail(u.email); setPassword('123456'); }}
-                className="w-full text-left p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors border border-white/10"
-              >
-                <p className="font-bold text-sm font-montserrat" style={{ color: u.color }}>{u.role}</p>
-                <p className="text-xs text-slate-400 font-inter mt-0.5">{u.email} / 123456</p>
-              </button>
-            ))}
-          </div>
-          <p className="text-xs text-slate-500 mt-5 font-inter leading-relaxed">
-            Click vào role để tự điền thông tin đăng nhập.
-          </p>
         </div>
       </main>
 

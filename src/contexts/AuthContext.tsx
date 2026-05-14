@@ -3,7 +3,6 @@ import type { User, Tenant, ModuleId } from '../types/auth';
 import { ROLE_MODULE_ACCESS, MODULE_ID_MAP } from '../types/auth';
 import { loginApi, getMyModulesApi } from '../api/auth';
 
-// ─── JWT Decode (không dùng thư viện) ────────────────────────────────────────
 function decodeJwtPayload(token: string): Record<string, unknown> {
   try {
     const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
@@ -13,18 +12,17 @@ function decodeJwtPayload(token: string): Record<string, unknown> {
   }
 }
 
-// ─── Context Types ────────────────────────────────────────────────────────────
 interface AuthContextType {
   user: User | null;
   tenant: Tenant | null;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
+  refreshModules: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-// ─── Provider ─────────────────────────────────────────────────────────────────
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(() => {
     const saved = localStorage.getItem('dodo_user');
@@ -37,7 +35,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = useCallback(async (email: string, password: string) => {
     try {
-      // 1. Gọi API đăng nhập
       const authData = await loginApi({ email, password });
 
       // 2. Lưu token vào localStorage (interceptor tự đính kèm cho request sau)
@@ -73,11 +70,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .map((s) => MODULE_ID_MAP[s.moduleId])
         .filter((m): m is ModuleId => m !== undefined);
 
+      const trialModules: ModuleId[] = subscriptions
+        .filter((s) => s.status === 'Trial')
+        .map((s) => MODULE_ID_MAP[s.moduleId])
+        .filter((m): m is ModuleId => m !== undefined);
+
       // 6. Tạo Tenant object
       const tenantData: Tenant = {
         id: tenantId as unknown as number,
         name: authData.tenantName,
         purchasedModules,
+        trialModules,
       };
 
       // 7. Lưu vào state + localStorage
@@ -108,23 +111,45 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('dodo_refreshToken');
   }, []);
 
+  const refreshModules = useCallback(async () => {
+    try {
+      const subscriptions = await getMyModulesApi();
+      const purchasedModules: ModuleId[] = subscriptions
+        .filter((s) => s.status !== 'Expired')
+        .map((s) => MODULE_ID_MAP[s.moduleId])
+        .filter((m): m is ModuleId => m !== undefined);
+      const trialModules: ModuleId[] = subscriptions
+        .filter((s) => s.status === 'Trial')
+        .map((s) => MODULE_ID_MAP[s.moduleId])
+        .filter((m): m is ModuleId => m !== undefined);
+      setTenant((prev) =>
+        prev ? { ...prev, purchasedModules, trialModules } : prev
+      );
+      // Sync to localStorage
+      setTenant((prev) => {
+        if (prev) localStorage.setItem('dodo_tenant', JSON.stringify(prev));
+        return prev;
+      });
+    } catch {
+      // silent fail — user can retry
+    }
+  }, []);
+
   return (
     <AuthContext.Provider
-      value={{ user, tenant, isAuthenticated: !!user, login, logout }}
+      value={{ user, tenant, isAuthenticated: !!user, login, logout, refreshModules }}
     >
       {children}
     </AuthContext.Provider>
   );
 }
 
-// ─── Hook ─────────────────────────────────────────────────────────────────────
 export function useAuth() {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error('useAuth must be used inside AuthProvider');
   return ctx;
 }
 
-// Helper: get accessible module ids for current user
 export function getAccessibleModules(user: User, tenant: Tenant): ModuleId[] {
   const allowed: ModuleId[] = ROLE_MODULE_ACCESS[user.role] ?? [];
   return tenant.purchasedModules.filter((m: ModuleId) => allowed.includes(m));
