@@ -1,245 +1,349 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import "./hr.css";
-import AddStaffModal from "./components/AddStaffModal";
+import { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import './hr.css';
+import InviteStaffModal from './components/InviteStaffModal';
+import DepartmentManager from './components/DepartmentManager';
+import { getEmployees } from '../../api/hr';
+import type { Employee } from '../../api/hr';
 
-const features = [
-    {
-        icon: "person_add",
-        title: "Tạo & quản lý",
-        desc: "Thêm nhân sự mới nhanh chóng chỉ với vài thao tác đơn giản.",
-        bg: "bg-blue-50",
-        text: "text-blue-600",
-    },
-    {
-        icon: "admin_panel_settings",
-        title: "Phân quyền rõ ràng",
-        desc: "Thiết lập vai trò Admin, Manager hay Member chi tiết.",
-        bg: "bg-indigo-50",
-        text: "text-indigo-600",
-    },
-    {
-        icon: "toggle_on",
-        title: "Kiểm soát trạng thái",
-        desc: "Theo dõi hoạt động và trạng thái Active/Inactive của user.",
-        bg: "bg-slate-100",
-        text: "text-slate-600",
-    },
-    {
-        icon: "lock",
-        title: "Bảo mật dữ liệu",
-        desc: "Mã hóa đầu cuối đảm bảo thông tin doanh nghiệp an toàn tuyệt đối.",
-        bg: "bg-slate-100",
-        text: "text-slate-700",
-    },
-];
 
-interface Employee {
-    id: number;
-    name: string;
-    email: string;
-    position: string;
-    department: "Engineering" | "HR" | "Design" | "Marketing" | "Sales";
-    status: "Active" | "Inactive" | "On Leave";
-    avatarColor: string;
+const PAGE_SIZE = 10;
+
+type TabType = 'employees' | 'departments';
+
+const STATUS_MAP: Record<string, { label: string; cls: string }> = {
+  Working:  { label: 'Đang làm việc', cls: 'hr-status-active'   },
+  Resigned: { label: 'Đã nghỉ việc',  cls: 'hr-status-inactive' },
+};
+
+function getStatusCfg(status: string) {
+  return STATUS_MAP[status] ?? { label: status, cls: 'hr-status-inactive' };
 }
 
-const employees: Employee[] = [
-    { id: 1, name: "Nguyễn Văn A", email: "a.nguyen@dodo.com", position: "Senior Developer", department: "Engineering", status: "Active", avatarColor: "#1d6ced" },
-    { id: 2, name: "Trần Thị B", email: "b.tran@dodo.com", position: "HR Manager", department: "HR", status: "Inactive", avatarColor: "#db2777" },
-    { id: 3, name: "Lê Văn C", email: "c.le@dodo.com", position: "Product Designer", department: "Design", status: "Active", avatarColor: "#2563eb" },
-    { id: 4, name: "Phạm Thị D", email: "d.pham@dodo.com", position: "Marketing Lead", department: "Marketing", status: "On Leave", avatarColor: "#d97706" },
-    { id: 5, name: "Hoàng Văn E", email: "e.hoang@dodo.com", position: "Sales Executive", department: "Sales", status: "Active", avatarColor: "#16a34a" },
-    { id: 6, name: "Bùi Văn F", email: "f.bui@dodo.com", position: "DevOps Engineer", department: "Engineering", status: "Active", avatarColor: "#7c3aed" },
-];
-
 export default function HRModule() {
-    const navigate = useNavigate();
-    const [searchTerm, setSearchTerm] = useState("");
-    const [currentPage, setCurrentPage] = useState(1);
-    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<TabType>('employees');
 
-    const openAddModal = () => setIsAddModalOpen(true);
-    const closeAddModal = () => setIsAddModalOpen(false);
+  // ── Employee list state ──
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [fetchError, setFetchError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchInput, setSearchInput] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [hasPrevious, setHasPrevious] = useState(false);
+  const [hasNext, setHasNext] = useState(false);
 
-    const filteredEmployees = employees.filter(
-        (e) =>
-            (e.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            e.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            e.position.toLowerCase().includes(searchTerm.toLowerCase()))
-    );
+  // ── Modal state ──
+  const [isInviteOpen, setIsInviteOpen] = useState(false);
 
-    return (
-        <div className="hr-module">
-            <main className="flex-1">
-                {/* Hero Section */}
-                <section className="hr-hero py-16 px-6 lg:px-12">
-                    <div className="text-center relative z-10">
-                        <h1 className="text-3xl md:text-5xl font-extrabold text-slate-900 mb-5 leading-tight">
-                            Quản lý nhân viên hiệu quả &<br />đồng bộ
-                        </h1>
-                        <p className="text-base md:text-lg text-[var(--text-muted)] font-inter max-w-2xl mx-auto mb-10 leading-relaxed">
-                            Quản lý toàn bộ hồ sơ nhân viên một cách dễ dàng và chuyên nghiệp. Nền tảng nhân sự số 1 cho doanh nghiệp hiện đại.
-                        </p>
-                        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                            <button 
-                                onClick={openAddModal}
-                                className="px-8 py-3.5 bg-[var(--primary)] text-white font-bold rounded-full hover:bg-[var(--primary-dark)] transition-all shadow-lg shadow-blue-200/50 flex items-center gap-2 justify-center"
-                            >
-                                <span className="material-symbols-outlined text-xl">person_add</span>
-                                Thêm nhân sự
-                            </button>
-                            <button className="px-8 py-3.5 bg-white text-slate-700 font-bold rounded-full border border-gray-200 hover:border-[var(--primary)] hover:text-[var(--primary)] transition-all flex items-center gap-2 justify-center shadow-sm">
-                                <span className="material-symbols-outlined text-xl">list_alt</span>
-                                Xem danh sách
-                            </button>
-                        </div>
-                    </div>
-                </section>
+  // ── Fetch employees ──
+  const fetchEmployees = useCallback(async (page: number, search: string) => {
+    setLoading(true);
+    setFetchError('');
+    try {
+      const res = await getEmployees({ pageNumber: page, pageSize: PAGE_SIZE, search });
+      setEmployees(res.items);
+      setTotalPages(res.totalPages);
+      setTotalCount(res.totalCount);
+      setHasPrevious(res.hasPrevious);
+      setHasNext(res.hasNext);
+    } catch {
+      setFetchError('Không thể tải danh sách nhân viên. Vui lòng thử lại.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-                {/* Features Section */}
-                <section className="py-14 px-6 lg:px-12">
-                    <div>
-                        <div className="mb-10">
-                            <h2 className="text-2xl font-extrabold text-slate-900 mb-2">Tính năng quản trị</h2>
-                            <p className="text-[var(--text-muted)] font-inter text-sm">
-                                Công cụ mạnh mẽ giúp bạn kiểm soát toàn diện tổ chức
-                            </p>
-                        </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                            {features.map((f, i) => (
-                                <div key={i} className="hr-feature-card bg-white rounded-2xl p-6">
-                                    <div className={`size-12 rounded-xl ${f.bg} ${f.text} flex items-center justify-center mb-4`}>
-                                        <span className="material-symbols-outlined text-2xl">{f.icon}</span>
-                                    </div>
-                                    <h3 className="text-base font-bold text-slate-900 mb-1.5">{f.title}</h3>
-                                    <p className="text-sm text-[var(--text-muted)] font-inter leading-relaxed">{f.desc}</p>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </section>
+  useEffect(() => {
+    if (activeTab === 'employees') {
+      fetchEmployees(currentPage, searchTerm);
+    }
+  }, [activeTab, currentPage, searchTerm, fetchEmployees]);
 
-                {/* Employee Table Section */}
-                <section className="pb-16 px-6 lg:px-12">
-                    <div>
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
-                            <div>
-                                <h2 className="text-2xl font-extrabold text-slate-900">Danh sách nhân viên</h2>
-                                <p className="text-sm text-slate-500 font-inter">Quản lý danh sách và thông tin chi tiết</p>
-                            </div>
-                            <div className="flex items-center gap-3 w-full sm:w-auto">
-                                <div className="relative flex-1 sm:flex-none">
-                                    <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl">search</span>
-                                    <input
-                                        type="text"
-                                        placeholder="Tìm kiếm nhân sự..."
-                                        value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
-                                        className="hr-search w-full sm:w-64 pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl outline-none text-sm"
-                                    />
-                                </div>
-                                <button className="hr-action-btn !w-10 !h-10 !rounded-xl">
-                                    <span className="material-symbols-outlined text-xl">filter_list</span>
-                                </button>
-                                <button 
-                                    onClick={openAddModal}
-                                    className="px-5 py-2.5 bg-[var(--primary)] text-white font-bold rounded-xl hover:bg-[var(--primary-dark)] transition-colors text-sm flex items-center gap-2 shadow-sm whitespace-nowrap"
+  // Search submit
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    setCurrentPage(1);
+    setSearchTerm(searchInput);
+  };
+
+  // Clear search
+  const handleClearSearch = () => {
+    setSearchInput('');
+    setSearchTerm('');
+    setCurrentPage(1);
+  };
+
+  // Pagination helpers
+  const getPageNumbers = () => {
+    const pages: (number | '...')[] = [];
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      if (currentPage > 3) pages.push('...');
+      for (
+        let i = Math.max(2, currentPage - 1);
+        i <= Math.min(totalPages - 1, currentPage + 1);
+        i++
+      ) {
+        pages.push(i);
+      }
+      if (currentPage < totalPages - 2) pages.push('...');
+      pages.push(totalPages);
+    }
+    return pages;
+  };
+
+  return (
+    <div className="hr-module">
+      {/* ── Tab Bar ── */}
+      <div className="hr-tab-bar">
+        <button
+          className={`hr-tab-btn ${activeTab === 'employees' ? 'active' : ''}`}
+          onClick={() => setActiveTab('employees')}
+        >
+          <span className="material-symbols-outlined">group</span>
+          Nhân viên
+          {totalCount > 0 && activeTab === 'employees' && (
+            <span className="hr-tab-count">{totalCount}</span>
+          )}
+        </button>
+        <button
+          className={`hr-tab-btn ${activeTab === 'departments' ? 'active' : ''}`}
+          onClick={() => setActiveTab('departments')}
+        >
+          <span className="material-symbols-outlined">domain</span>
+          Phòng ban & Chức vụ
+        </button>
+      </div>
+
+      <main className="flex-1">
+        {/* ══════════════ TAB: EMPLOYEES ══════════════ */}
+        {activeTab === 'employees' && (
+          <section className="pb-16 px-6 lg:px-12 pt-8">
+            {/* Section header */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
+              <div>
+                <h2 className="text-2xl font-extrabold text-slate-900">Danh sách nhân viên</h2>
+                <p className="text-sm text-slate-500 font-inter">
+                  {totalCount > 0
+                    ? `${totalCount} nhân viên trong hệ thống`
+                    : 'Quản lý danh sách và thông tin chi tiết'}
+                </p>
+              </div>
+              <div className="flex items-center gap-3 w-full sm:w-auto">
+                {/* Search form */}
+                <form
+                  className="relative flex-1 sm:flex-none"
+                  onSubmit={handleSearch}
+                >
+                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl">
+                    search
+                  </span>
+                  <input
+                    type="text"
+                    placeholder="Tìm kiếm nhân sự..."
+                    value={searchInput}
+                    onChange={(e) => setSearchInput(e.target.value)}
+                    className="hr-search w-full sm:w-64 pl-10 pr-9 py-2.5 border border-gray-200 rounded-xl outline-none text-sm"
+                  />
+                  {searchInput && (
+                    <button
+                      type="button"
+                      onClick={handleClearSearch}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                    >
+                      <span className="material-symbols-outlined text-lg">close</span>
+                    </button>
+                  )}
+                </form>
+
+                <button
+                  onClick={() => setIsInviteOpen(true)}
+                  className="px-5 py-2.5 bg-[var(--primary)] text-white font-bold rounded-xl hover:bg-[var(--primary-dark)] transition-colors text-sm flex items-center gap-2 shadow-sm whitespace-nowrap"
+                >
+                  <span className="material-symbols-outlined text-lg">person_add</span>
+                  Mời nhân viên
+                </button>
+              </div>
+            </div>
+
+            {/* Error banner */}
+            {fetchError && (
+              <div className="hr-fetch-error">
+                <span className="material-symbols-outlined">error</span>
+                {fetchError}
+                <button onClick={() => fetchEmployees(currentPage, searchTerm)}>
+                  Thử lại
+                </button>
+              </div>
+            )}
+
+            {/* Table */}
+            <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
+              <div className="overflow-x-auto">
+                <table className="hr-table w-full text-left">
+                  <thead>
+                    <tr>
+                      <th>Nhân viên</th>
+                      <th>Email</th>
+                      <th>Phòng ban</th>
+                      <th>Chức vụ</th>
+                      <th>Ngày vào</th>
+                      <th>Trạng thái</th>
+                      <th className="text-right">Hành động</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {loading ? (
+                      <tr>
+                        <td colSpan={7} className="hr-table-loading">
+                          <span className="material-symbols-outlined hr-loading-spin">
+                            progress_activity
+                          </span>
+                          Đang tải dữ liệu...
+                        </td>
+                      </tr>
+                    ) : employees.length === 0 ? (
+                      <tr>
+                        <td colSpan={7} className="hr-table-empty">
+                          <span className="material-symbols-outlined">person_off</span>
+                          {searchTerm
+                            ? `Không tìm thấy kết quả cho "${searchTerm}"`
+                            : 'Chưa có nhân viên nào trong hệ thống'}
+                        </td>
+                      </tr>
+                    ) : (
+                      employees.map((emp) => {
+                        const st = getStatusCfg(emp.status);
+                        const initials = emp.fullName
+                          .split(' ')
+                          .slice(-2)
+                          .map((w) => w.charAt(0))
+                          .join('');
+                        const hireDate = emp.hireDate
+                          ? new Date(emp.hireDate).toLocaleDateString('vi-VN')
+                          : '—';
+                        return (
+                          <tr key={emp.id}>
+                            <td>
+                              <div className="flex items-center gap-3">
+                                <div
+                                  className="hr-avatar"
+                                  style={{ background: '#1d6ced' }}
                                 >
-                                    <span className="material-symbols-outlined text-lg">add</span>
-                                    Thêm nhân sự
-                                </button>
-                            </div>
-                        </div>
-
-                        <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
-                            <div className="overflow-x-auto">
-                                <table className="hr-table w-full text-left">
-                                    <thead>
-                                        <tr>
-                                            <th>Full Name</th>
-                                            <th>Email</th>
-                                            <th>Position</th>
-                                            <th>Department</th>
-                                            <th>Status</th>
-                                            <th className="text-right">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {filteredEmployees.map((emp) => (
-                                            <tr key={emp.id}>
-                                                <td>
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="hr-avatar" style={{ backgroundColor: emp.avatarColor }}>
-                                                            {emp.name.charAt(0)}
-                                                        </div>
-                                                        <span className="font-semibold text-slate-900">
-                                                            {emp.name}
-                                                        </span>
-                                                    </div>
-                                                </td>
-                                                <td className="text-slate-500 font-inter">{emp.email}</td>
-                                                <td className="text-slate-700 font-inter font-medium">{emp.position}</td>
-                                                <td>
-                                                    <span className={`hr-badge hr-dept-${emp.department.toLowerCase()}`}>
-                                                        {emp.department}
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    <div className={`hr-status-badge ${emp.status === "Active" ? "hr-status-active" : emp.status === "Inactive" ? "hr-status-inactive" : "hr-status-leave"}`}>
-                                                        <div className="hr-status-dot"></div>
-                                                        {emp.status}
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <div className="flex items-center gap-2 justify-end">
-                                                        <button
-                                                            className="text-slate-400 hover:text-[var(--primary)] transition-colors"
-                                                            title="Chỉnh sửa nhân viên"
-                                                            onClick={() => navigate(`/app/hr/edit/${emp.id}`)}
-                                                        >
-                                                            <span className="material-symbols-outlined text-xl">edit_square</span>
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            {/* Pagination */}
-                            <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100">
-                                <p className="text-sm text-[var(--text-muted)] font-inter">
-                                    Hiển thị {filteredEmployees.length} trên 50 kết quả
-                                </p>
-                                <div className="flex items-center gap-2">
-                                    <button className="hr-page-btn" onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}>
-                                        <span className="material-symbols-outlined text-lg">chevron_left</span>
-                                    </button>
-                                    {[1, 2, 3].map((page) => (
-                                        <button
-                                            key={page}
-                                            className={`hr-page-btn ${currentPage === page ? "active" : ""}`}
-                                            onClick={() => setCurrentPage(page)}
-                                        >
-                                            {page}
-                                        </button>
-                                    ))}
-                                    <button className="hr-page-btn" onClick={() => setCurrentPage(Math.min(3, currentPage + 1))}>
-                                        <span className="material-symbols-outlined text-lg">chevron_right</span>
-                                    </button>
+                                  {initials || '?'}
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-            </main>
+                                <span className="font-semibold text-slate-900">
+                                  {emp.fullName}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="text-slate-500 font-inter">{emp.email}</td>
+                            <td>
+                              <span className="hr-dept-pill">{emp.departmentName || '—'}</span>
+                            </td>
+                            <td className="text-slate-700 font-inter font-medium">
+                              {emp.positionName || '—'}
+                            </td>
+                            <td className="text-slate-500 font-inter text-sm">{hireDate}</td>
+                            <td>
+                              <div className={`hr-status-badge ${st.cls}`}>
+                                <div className="hr-status-dot" />
+                                {st.label}
+                              </div>
+                            </td>
+                            <td>
+                              <div className="flex items-center justify-end gap-2">
+                                <button
+                                  className="text-slate-400 hover:text-[var(--primary)] transition-colors"
+                                  title="Chỉnh sửa nhân viên"
+                                  onClick={() => navigate(`/app/hr/edit/${emp.id}`)}
+                                >
+                                  <span className="material-symbols-outlined text-xl">edit_square</span>
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
 
-            <AddStaffModal 
-                isOpen={isAddModalOpen} 
-                onClose={closeAddModal} 
-            />
-        </div>
-    );
+              {/* Pagination */}
+              {!loading && totalPages > 0 && (
+                <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100">
+                  <p className="text-sm text-[var(--text-muted)] font-inter">
+                    Trang {currentPage} / {totalPages} &bull; {totalCount} kết quả
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <button
+                      className="hr-page-btn"
+                      onClick={() => setCurrentPage((p) => p - 1)}
+                      disabled={!hasPrevious}
+                    >
+                      <span className="material-symbols-outlined text-lg">chevron_left</span>
+                    </button>
+
+                    {getPageNumbers().map((page, idx) =>
+                      page === '...' ? (
+                        <span key={`ellipsis-${idx}`} className="hr-page-ellipsis">
+                          ...
+                        </span>
+                      ) : (
+                        <button
+                          key={page}
+                          className={`hr-page-btn ${currentPage === page ? 'active' : ''}`}
+                          onClick={() => setCurrentPage(Number(page))}
+                        >
+                          {page}
+                        </button>
+                      )
+                    )}
+
+                    <button
+                      className="hr-page-btn"
+                      onClick={() => setCurrentPage((p) => p + 1)}
+                      disabled={!hasNext}
+                    >
+                      <span className="material-symbols-outlined text-lg">chevron_right</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </section>
+        )}
+
+        {/* ══════════════ TAB: DEPARTMENTS ══════════════ */}
+        {activeTab === 'departments' && (
+          <section className="pb-16 px-6 lg:px-12 pt-8">
+            <div className="mb-6">
+              <h2 className="text-2xl font-extrabold text-slate-900">Phòng ban & Chức vụ</h2>
+              <p className="text-sm text-slate-500 font-inter">
+                Tạo và quản lý cơ cấu tổ chức của doanh nghiệp
+              </p>
+            </div>
+            <DepartmentManager />
+          </section>
+        )}
+      </main>
+
+      {/* ── Invite Modal ── */}
+      <InviteStaffModal
+        isOpen={isInviteOpen}
+        onClose={() => setIsInviteOpen(false)}
+        onSuccess={() => {
+          // Refresh employee list after invite
+          if (activeTab === 'employees') fetchEmployees(currentPage, searchTerm);
+        }}
+      />
+    </div>
+  );
 }

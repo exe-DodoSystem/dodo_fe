@@ -21,7 +21,7 @@ export async function getBillingOrders(): Promise<BillingOrder[]> {
   return response.data;
 }
 
-// POST /api/Payment/create?orderId={id}  →  returns plain URL string
+// POST /api/Payment/create?orderId={id}
 export async function createPaymentUrl(orderId: string): Promise<string> {
   const response = await axiosClient.post<string>(
     `/api/Payment/create?orderId=${orderId}`
@@ -29,7 +29,7 @@ export async function createPaymentUrl(orderId: string): Promise<string> {
   return response.data;
 }
 
-// POST /api/Payment/simulate/vnpay/success?orderId={id}  [Dev only]
+// POST /api/Payment/simulate/vnpay/success?orderId={id}
 export async function simulatePaymentSuccess(orderId: string): Promise<void> {
   await axiosClient.post(`/api/Payment/simulate/vnpay/success?orderId=${orderId}`);
 }

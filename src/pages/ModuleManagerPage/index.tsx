@@ -22,19 +22,17 @@ function formatDate(dateStr: string): string {
 
 const STATUS_CONFIG = {
   active: { label: 'Đã kích hoạt', badgeClass: 'mm-badge-active', icon: 'check_circle' },
-  trial:  { label: 'Dùng thử',     badgeClass: 'mm-badge-trial',  icon: 'hourglass_top' },
-  locked: { label: 'Chưa mua',     badgeClass: 'mm-badge-locked', icon: 'lock' },
+  trial: { label: 'Dùng thử', badgeClass: 'mm-badge-trial', icon: 'hourglass_top' },
+  locked: { label: 'Chưa mua', badgeClass: 'mm-badge-locked', icon: 'lock' },
 };
 
 export default function ModuleManagerPage() {
   const navigate = useNavigate();
   const { tenant, refreshModules } = useAuth();
-
   const [paying, setPaying] = useState(false);
   const [payError, setPayError] = useState('');
   const [paySuccess, setPaySuccess] = useState(false);
   const [loadingModules, setLoadingModules] = useState(true);
-  // moduleId (number) → endDate string
   const [endDateMap, setEndDateMap] = useState<Record<number, string>>({});
 
   useEffect(() => {
@@ -92,7 +90,6 @@ export default function ModuleManagerPage() {
 
   return (
     <div className="mm-page">
-      {/* Header */}
       <div className="mm-header">
         <div className="mm-header-left">
           <button className="mm-back-btn" onClick={() => navigate(-1)}>
@@ -114,7 +111,6 @@ export default function ModuleManagerPage() {
         )}
       </div>
 
-      {/* Banners */}
       {paySuccess && (
         <div className="mm-banner mm-banner-success">
           <span className="material-symbols-outlined">check_circle</span>
@@ -136,7 +132,6 @@ export default function ModuleManagerPage() {
         </div>
       )}
 
-      {/* Table */}
       <div className="mm-table-wrap">
         <table className="mm-table">
           <colgroup>

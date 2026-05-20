@@ -21,8 +21,8 @@ export interface User {
 export interface Tenant {
   id: number;
   name: string;
-  purchasedModules: ModuleId[]; // Active + Trial (non-expired)
-  trialModules: ModuleId[];     // Only status === "Trial"
+  purchasedModules: ModuleId[];
+  trialModules: ModuleId[];
 }
 
 export interface ModuleDefinition {

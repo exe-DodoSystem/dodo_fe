@@ -14,6 +14,7 @@ import CustomerDetailPage from '../pages/CRMModule/components/CustomerDetailPage
 import EditCustomerPage from '../pages/CRMModule/components/EditCustomerPage';
 import InventoryModule from '../pages/InventoryModule';
 import ModuleManagerPage from '../pages/ModuleManagerPage';
+import InviteCompletePage from '../pages/InviteCompletePage';
 
 export default function AppRoutes() {
   return (
@@ -22,6 +23,7 @@ export default function AppRoutes() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/products" element={<ProductsPage />} />
+      <Route path="/invite/complete" element={<InviteCompletePage />} />
 
       <Route
         path="/app"
@@ -46,3 +48,4 @@ export default function AppRoutes() {
     </Routes>
   );
 }
+
