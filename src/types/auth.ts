@@ -1,4 +1,4 @@
-export type Role = 'TenantAdmin' | 'Manager' | 'Employee';
+export type Role = 'TenantAdmin' | 'Manager' | 'HRManager' | 'Employee';
 
 export type ModuleId =
   | 'hr'
@@ -99,6 +99,7 @@ export const MODULE_ID_MAP: Record<number, ModuleId> = {
 
 export const ROLE_MODULE_ACCESS: Record<Role, ModuleId[]> = {
   TenantAdmin: ['hr', 'attendance', 'sales', 'tasks', 'dashboard'],
-  Manager: ['hr', 'attendance', 'sales', 'tasks'],
-  Employee: ['attendance', 'tasks'],
+  Manager:     ['hr', 'attendance', 'sales', 'tasks'],
+  HRManager:   ['hr', 'attendance', 'tasks'],
+  Employee:    ['attendance', 'tasks'],
 };

@@ -5,6 +5,7 @@ import RegisterPage from '../pages/RegisterPage';
 import ProductsPage from '../pages/ProductsPage';
 import AppLayout from '../layouts/AppLayout';
 import ProtectedRoute from './ProtectedRoute';
+import RoleRoute from './RoleRoute';
 import DashboardPage from '../pages/DashboardPage';
 import HRModule from '../pages/HRModule';
 import EditEmployeePage from '../pages/HRModule/components/EditEmployeePage';
@@ -35,8 +36,22 @@ export default function AppRoutes() {
       >
         <Route index element={<Navigate to="/app/dashboard" replace />} />
         <Route path="dashboard" element={<DashboardPage />} />
-        <Route path="hr" element={<HRModule />} />
-        <Route path="hr/edit/:id" element={<EditEmployeePage />} />
+        <Route
+          path="hr"
+          element={
+            <RoleRoute allowedRoles={['TenantAdmin', 'Manager', 'HRManager']}>
+              <HRModule />
+            </RoleRoute>
+          }
+        />
+        <Route
+          path="hr/edit/:id"
+          element={
+            <RoleRoute allowedRoles={['TenantAdmin', 'Manager', 'HRManager']}>
+              <EditEmployeePage />
+            </RoleRoute>
+          }
+        />
         <Route path="attendance" element={<AttendanceModule />} />
         <Route path="crm" element={<CRMModule />} />
         <Route path="crm/:id" element={<CustomerDetailPage />} />

@@ -3,13 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import './hr.css';
 import InviteStaffModal from './components/InviteStaffModal';
 import DepartmentManager from './components/DepartmentManager';
+import ManagerDepartmentTab from './components/ManagerDepartmentTab';
 import { getEmployees } from '../../api/hr';
 import type { Employee } from '../../api/hr';
+import { useAuth } from '../../contexts/AuthContext';
 
 
 const PAGE_SIZE = 10;
 
-type TabType = 'employees' | 'departments';
+type TabType = 'employees' | 'departments' | 'manager-depts';
 
 const STATUS_MAP: Record<string, { label: string; cls: string }> = {
   Working:  { label: 'Đang làm việc', cls: 'hr-status-active'   },
@@ -22,6 +24,8 @@ function getStatusCfg(status: string) {
 
 export default function HRModule() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const isTenantAdmin = user?.role === 'TenantAdmin';
   const [activeTab, setActiveTab] = useState<TabType>('employees');
 
   // ── Employee list state ──
@@ -119,6 +123,15 @@ export default function HRModule() {
           <span className="material-symbols-outlined">domain</span>
           Phòng ban & Chức vụ
         </button>
+        {isTenantAdmin && (
+          <button
+            className={`hr-tab-btn ${activeTab === 'manager-depts' ? 'active' : ''}`}
+            onClick={() => setActiveTab('manager-depts')}
+          >
+            <span className="material-symbols-outlined">manage_accounts</span>
+            Phân công Manager
+          </button>
+        )}
       </div>
 
       <main className="flex-1">
@@ -331,6 +344,19 @@ export default function HRModule() {
               </p>
             </div>
             <DepartmentManager />
+          </section>
+        )}
+
+        {/* ══════════════ TAB: MANAGER-DEPARTMENTS ══════════════ */}
+        {activeTab === 'manager-depts' && isTenantAdmin && (
+          <section className="pb-16 px-6 lg:px-12 pt-8">
+            <div className="mb-6">
+              <h2 className="text-2xl font-extrabold text-slate-900">Phân công Manager</h2>
+              <p className="text-sm text-slate-500 font-inter">
+                Gán Manager vào phòng ban để quản lý nhân sự
+              </p>
+            </div>
+            <ManagerDepartmentTab />
           </section>
         )}
       </main>

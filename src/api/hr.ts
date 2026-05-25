@@ -17,6 +17,7 @@ export interface Employee {
   resignationDate: string | null;
   baseSalary: number;
   status: 'Working' | 'Resigned' | string;
+  roleName?: string;
 }
 
 export interface PaginatedResponse<T> {
@@ -68,16 +69,18 @@ export interface GetEmployeesParams {
   pageNumber?: number;
   pageSize?: number;
   search?: string;
+  roleId?: number;
 }
 
 export async function getEmployees(
   params: GetEmployeesParams = {}
 ): Promise<PaginatedResponse<Employee>> {
-  const { pageNumber = 1, pageSize = 10, search = '' } = params;
+  const { pageNumber = 1, pageSize = 10, search = '', roleId } = params;
   const query = new URLSearchParams({
     pageNumber: String(pageNumber),
     pageSize: String(pageSize),
     ...(search ? { search } : {}),
+    ...(roleId !== undefined ? { roleId: String(roleId) } : {}),
   });
   const response = await axiosClient.get<PaginatedResponse<Employee>>(
     `/api/hr/employees?${query}`
@@ -174,6 +177,40 @@ export async function updatePosition(
 
 export async function deletePosition(id: string): Promise<void> {
   await axiosClient.delete(`/api/hr/positions/${id}`);
+}
+
+// ─── Manager-Department assignment ────────────────────────────────────────────
+
+export interface ManagerDepartmentAssignment {
+  userId: string;
+  departmentId: string;
+  departmentName: string;
+  assignedAt: string;
+  assignedByUserId: string;
+}
+
+export async function getManagerDepartments(
+  userId: string
+): Promise<ManagerDepartmentAssignment[]> {
+  const res = await axiosClient.get<ManagerDepartmentAssignment[]>(
+    `/api/hr/managers/${userId}/departments`
+  );
+  return res.data;
+}
+
+export async function assignManagerDepartments(
+  userId: string,
+  departmentIds: string[]
+): Promise<void> {
+  await axiosClient.post(`/api/hr/managers/${userId}/departments`, { departmentIds });
+}
+
+
+export async function removeManagerFromDepartment(
+  userId: string,
+  departmentId: string
+): Promise<void> {
+  await axiosClient.delete(`/api/hr/managers/${userId}/departments/${departmentId}`);
 }
 
 // ─── Roles ────────────────────────────────────────────────────────────────────
