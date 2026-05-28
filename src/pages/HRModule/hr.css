@@ -366,4 +366,752 @@
     color: #94a3b8;
     font-size: 0.85rem;
     font-family: 'Inter', sans-serif;
-}
+}
+
+/* ══════════════════════════════════════════════════════════════
+   WORK SCHEDULE — Sub-tab & Layout
+══════════════════════════════════════════════════════════════ */
+
+.work-schedule-wrap {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+}
+
+.work-schedule-content {
+    padding: 24px 32px 48px;
+    flex: 1;
+}
+
+/* ── Sub-tab bar ── */
+.hr-sub-tab-bar {
+    display: flex;
+    gap: 4px;
+    padding: 14px 32px 0;
+    border-bottom: 2px solid #e9eef6;
+    background: #f8fafc;
+}
+
+.hr-sub-tab-btn {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 16px;
+    border: none;
+    background: transparent;
+    color: #64748b;
+    font-size: 0.85rem;
+    font-weight: 600;
+    font-family: 'Montserrat', sans-serif;
+    border-radius: 8px 8px 0 0;
+    cursor: pointer;
+    position: relative;
+    transition: color 0.15s, background 0.15s;
+}
+
+.hr-sub-tab-btn .material-symbols-outlined {
+    font-size: 18px;
+}
+
+.hr-sub-tab-btn:hover {
+    color: var(--primary);
+    background: #eef3fd;
+}
+
+.hr-sub-tab-btn.active {
+    color: var(--primary);
+    background: #eef3fd;
+}
+
+.hr-sub-tab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--primary);
+    border-radius: 2px 2px 0 0;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   SHIFT TAB — List & Table
+══════════════════════════════════════════════════════════════ */
+
+.shift-tab-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.shift-tab-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.shift-tab-title {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin: 0 0 4px;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.shift-tab-sub {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+}
+
+.shift-tab-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.shift-table-wrap {
+    background: #fff;
+    border-radius: 16px;
+    border: 1px solid #e9eef6;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+}
+
+/* ── Code cell ── */
+.shift-code-cell {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: #1d6ced;
+    background: #eef3fd;
+    padding: 3px 10px;
+    border-radius: 6px;
+    letter-spacing: 0.04em;
+}
+
+/* ── CrossDay badges ── */
+.shift-crossday-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+    background: #fdf2f8;
+    color: #db2777;
+    border: 1px solid #fbcfe8;
+}
+
+.shift-normal-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+    background: #f0fdf4;
+    color: #16a34a;
+    border: 1px solid #bbf7d0;
+}
+
+/* ── Table empty ── */
+.shift-table-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 48px 20px;
+    color: #94a3b8;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.875rem;
+}
+
+.shift-table-empty .material-symbols-outlined {
+    font-size: 36px;
+    opacity: 0.5;
+}
+
+/* ── Danger action button ── */
+.hr-action-btn-danger {
+    color: #ef4444 !important;
+}
+
+.hr-action-btn-danger:hover {
+    border-color: #ef4444 !important;
+    background-color: #fff1f2 !important;
+    color: #ef4444 !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   SHIFT FORM DRAWER
+══════════════════════════════════════════════════════════════ */
+
+.shift-drawer-title {
+    font-size: 1rem;
+    font-weight: 700;
+    font-family: 'Montserrat', sans-serif;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+}
+
+.shift-drawer-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 12px 0 4px;
+}
+
+.shift-form-section {
+    margin-bottom: 8px;
+}
+
+.shift-form-section-title {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: 'Montserrat', sans-serif;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 14px;
+}
+
+.shift-form-row {
+    display: flex;
+    gap: 14px;
+}
+
+.shift-form-row > * {
+    flex: 1;
+    min-width: 0;
+}
+
+/* ── Segment card ── */
+.shift-segment-card {
+    background: #f8fafc;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px 16px 4px;
+    margin-bottom: 14px;
+    transition: border-color 0.15s;
+}
+
+.shift-segment-card:hover {
+    border-color: #c7d7f9;
+}
+
+.shift-segment-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+}
+
+.shift-segment-index {
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: 'Montserrat', sans-serif;
+    color: #1d6ced;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.shift-add-segment-btn {
+    border-color: #1d6ced !important;
+    color: #1d6ced !important;
+    border-radius: 10px !important;
+    font-weight: 600 !important;
+    font-family: 'Inter', sans-serif !important;
+    margin-top: 4px;
+}
+
+.shift-add-segment-btn:hover {
+    background: #eef3fd !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   PATTERN TAB — List & Preview
+══════════════════════════════════════════════════════════════ */
+
+.pattern-cycle-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+    background: #eff6ff;
+    color: #2563eb;
+    border: 1px solid #bfdbfe;
+}
+
+.pattern-preview-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    align-items: center;
+}
+
+.pattern-day-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    letter-spacing: 0.02em;
+}
+
+.pattern-day-chip.shift-chip {
+    background: #eef3fd;
+    color: #1d6ced;
+    border: 1px solid #c7d7f9;
+}
+
+.pattern-day-chip.off-chip {
+    background: #f8fafc;
+    color: #94a3b8;
+    border: 1px solid #e2e8f0;
+}
+
+.pattern-day-chip.more-chip {
+    background: #f1f5f9;
+    color: #64748b;
+    border: 1px solid #e2e8f0;
+    font-family: 'Inter', sans-serif;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   PATTERN FORM DRAWER — Day Grid
+══════════════════════════════════════════════════════════════ */
+
+.pattern-day-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    color: #475569;
+}
+
+.pattern-shift-code {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-weight: 700;
+    font-size: 0.78rem;
+    color: #1d6ced;
+    background: #eef3fd;
+    padding: 1px 7px;
+    border-radius: 5px;
+}
+
+.pattern-grid-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 48px 20px;
+    color: #94a3b8;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.875rem;
+    background: #f8fafc;
+    border-radius: 10px;
+    border: 1.5px dashed #e2e8f0;
+}
+
+.pattern-grid-empty .material-symbols-outlined {
+    font-size: 36px;
+    opacity: 0.5;
+}
+
+.pattern-day-grid .ant-table-tbody > tr > td {
+    padding: 8px 12px !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   ANT DESIGN OVERRIDES — Match HR theme
+══════════════════════════════════════════════════════════════ */
+
+/* Table */
+.shift-table-wrap .ant-table-thead > tr > th {
+    font-family: 'Montserrat', sans-serif !important;
+    font-weight: 700 !important;
+    font-size: 0.78rem !important;
+    color: #64748b !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.04em !important;
+    background: #fafbfc !important;
+    border-bottom: 1px solid #e5e7eb !important;
+}
+
+.shift-table-wrap .ant-table-tbody > tr > td {
+    font-family: 'Inter', sans-serif !important;
+    font-size: 0.875rem !important;
+    color: #334155 !important;
+    border-bottom: 1px solid #f1f3f5 !important;
+}
+
+.shift-table-wrap .ant-table-tbody > tr:hover > td {
+    background: #f8fafc !important;
+}
+
+.shift-table-wrap .ant-pagination {
+    padding: 12px 16px !important;
+    margin: 0 !important;
+    border-top: 1px solid #f1f3f5;
+}
+
+/* Drawer */
+.shift-form-drawer .ant-drawer-header {
+    border-bottom: 1px solid #e9eef6 !important;
+    padding: 16px 24px !important;
+}
+
+.shift-form-drawer .ant-drawer-body {
+    padding: 24px !important;
+}
+
+.shift-form-drawer .ant-drawer-footer {
+    border-top: 1px solid #e9eef6 !important;
+    padding: 12px 24px !important;
+}
+
+.shift-form-drawer .ant-form-item-label > label {
+    font-weight: 600 !important;
+    font-size: 0.82rem !important;
+    color: #475569 !important;
+    font-family: 'Inter', sans-serif !important;
+}
+
+/* Primary button override */
+.ant-btn-primary {
+    background: #1d6ced !important;
+    border-color: #1d6ced !important;
+}
+
+.ant-btn-primary:hover {
+    background: #1656c2 !important;
+    border-color: #1656c2 !important;
+}
+
+/* Input focus ring */
+.ant-input:focus,
+.ant-input-number-focused,
+.ant-picker-focused,
+.ant-select-focused .ant-select-selector {
+    border-color: #1d6ced !important;
+    box-shadow: 0 0 0 3px rgba(29, 108, 237, 0.1) !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   SHIFT DETAIL DRAWER
+══════════════════════════════════════════════════════════════ */
+
+.shift-detail-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 4px 0 8px;
+}
+
+.shift-detail-code-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 64px;
+    padding: 10px 14px;
+    background: #eef3fd;
+    border: 1.5px solid #c7d7f9;
+    border-radius: 12px;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-weight: 800;
+    font-size: 1.1rem;
+    color: #1d6ced;
+    letter-spacing: 0.04em;
+    flex-shrink: 0;
+}
+
+.shift-detail-pattern-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    background: #eef3fd;
+    border: 1.5px solid #c7d7f9;
+    border-radius: 14px;
+    flex-shrink: 0;
+}
+
+.shift-detail-pattern-icon .material-symbols-outlined {
+    font-size: 26px;
+    color: #1d6ced;
+}
+
+.shift-detail-header-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.shift-detail-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 0;
+}
+
+.shift-detail-label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    color: #64748b;
+}
+
+.shift-detail-value {
+    font-size: 0.9rem;
+    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+    color: #1e293b;
+}
+
+/* ── Segment cards in detail ── */
+.shift-detail-segment-card {
+    background: #f8fafc;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    transition: border-color 0.15s;
+}
+
+.shift-detail-segment-card:hover {
+    border-color: #c7d7f9;
+}
+
+.shift-detail-segment-index {
+    font-size: 0.72rem;
+    font-weight: 700;
+    font-family: 'Montserrat', sans-serif;
+    color: #1d6ced;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 10px;
+}
+
+.shift-detail-segment-body {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.shift-detail-segment-times {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.shift-detail-time {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-weight: 800;
+    font-size: 1.15rem;
+    color: #1e293b;
+}
+
+.shift-detail-arrow {
+    color: #94a3b8;
+    font-size: 1rem;
+}
+
+.shift-detail-offsets {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.shift-detail-offset-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+}
+
+/* ── Segment count badge ── */
+.shift-seg-count-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    height: 28px;
+    padding: 0 8px;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+    color: #475569;
+}
+
+/* ── Off-day label ── */
+.shift-detail-off-label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    color: #94a3b8;
+    font-style: italic;
+}
+
+/* ── Off-day row in pattern detail table ── */
+.pattern-detail-off-row td {
+    background: #fafbfc !important;
+}
+
+/* ── Segment time small (in pattern detail) ── */
+.shift-detail-seg-time-small {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #334155;
+    background: #f1f5f9;
+    padding: 2px 8px;
+    border-radius: 5px;
+    display: inline-block;
+}
+
+/* ── Loading state in detail drawer ── */
+.shift-detail-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    height: 300px;
+    color: #94a3b8;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   SHIFT ASSIGNMENT TAB
+══════════════════════════════════════════════════════════════ */
+
+/* ── Filter bar ── */
+.assign-filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background: #f8fafc;
+    border: 1px solid #e9eef6;
+    border-radius: 12px;
+    flex-wrap: wrap;
+}
+
+.assign-active-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 4px;
+}
+
+/* ── Status badges ── */
+.assign-status-active {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+    background: #f0fdf4;
+    color: #16a34a;
+    border: 1px solid #bbf7d0;
+}
+
+.assign-status-expired {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+    background: #f8fafc;
+    color: #94a3b8;
+    border: 1px solid #e2e8f0;
+}
+
+/* ── Reassign button ── */
+.assign-reassign-btn {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 5px;
+    width: auto !important;
+    padding: 0 10px !important;
+    font-size: 0.78rem !important;
+    font-weight: 600 !important;
+    font-family: 'Inter', sans-serif !important;
+    white-space: nowrap;
+}
+
+.assign-reassign-btn span:last-child {
+    font-size: 0.78rem;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   BULK ASSIGN DRAWER
+══════════════════════════════════════════════════════════════ */
+
+/* ── Employee section header ── */
+.bulk-assign-emp-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+/* ── Employee filter bar ── */
+.bulk-assign-filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+/* ── Employee table inside drawer ── */
+.bulk-assign-emp-table .ant-table-thead > tr > th {
+    font-size: 0.75rem !important;
+    padding: 8px 12px !important;
+    background: #f8fafc !important;
+}
+
+.bulk-assign-emp-table .ant-table-tbody > tr > td {
+    padding: 8px 12px !important;
+}
+
+.bulk-assign-emp-table .ant-table-tbody > tr:hover > td {
+    background: #f0f7ff !important;
+    cursor: pointer;
+}
+
+/* Selected row highlight */
+.bulk-assign-emp-table .ant-table-tbody > tr.ant-table-row-selected > td {
+    background: #eef3fd !important;
+}
+
+

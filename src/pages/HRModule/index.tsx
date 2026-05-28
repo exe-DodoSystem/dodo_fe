@@ -4,6 +4,7 @@ import './hr.css';
 import InviteStaffModal from './components/InviteStaffModal';
 import DepartmentManager from './components/DepartmentManager';
 import ManagerDepartmentTab from './components/ManagerDepartmentTab';
+import WorkScheduleTab from './components/WorkScheduleTab';
 import { getEmployees } from '../../api/hr';
 import type { Employee } from '../../api/hr';
 import { useAuth } from '../../contexts/AuthContext';
@@ -11,11 +12,11 @@ import { useAuth } from '../../contexts/AuthContext';
 
 const PAGE_SIZE = 10;
 
-type TabType = 'employees' | 'departments' | 'manager-depts';
+type TabType = 'employees' | 'departments' | 'manager-depts' | 'work-schedule';
 
 const STATUS_MAP: Record<string, { label: string; cls: string }> = {
-  Working:  { label: 'Đang làm việc', cls: 'hr-status-active'   },
-  Resigned: { label: 'Đã nghỉ việc',  cls: 'hr-status-inactive' },
+  Working: { label: 'Đang làm việc', cls: 'hr-status-active' },
+  Resigned: { label: 'Đã nghỉ việc', cls: 'hr-status-inactive' },
 };
 
 function getStatusCfg(status: string) {
@@ -26,6 +27,9 @@ export default function HRModule() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const isTenantAdmin = user?.role === 'TenantAdmin';
+  const isHRManager = user?.role === 'HRManager';
+  const isManager = user?.role === 'Manager';
+  const canManageSchedule = isTenantAdmin || isHRManager || isManager;
   const [activeTab, setActiveTab] = useState<TabType>('employees');
 
   // ── Employee list state ──
@@ -130,6 +134,15 @@ export default function HRModule() {
           >
             <span className="material-symbols-outlined">manage_accounts</span>
             Phân công Manager
+          </button>
+        )}
+        {canManageSchedule && (
+          <button
+            className={`hr-tab-btn ${activeTab === 'work-schedule' ? 'active' : ''}`}
+            onClick={() => setActiveTab('work-schedule')}
+          >
+            <span className="material-symbols-outlined">event_note</span>
+            Lịch làm việc
           </button>
         )}
       </div>
@@ -358,6 +371,11 @@ export default function HRModule() {
             </div>
             <ManagerDepartmentTab />
           </section>
+        )}
+
+        {/* ══════════════ TAB: WORK SCHEDULE ══════════════ */}
+        {activeTab === 'work-schedule' && canManageSchedule && (
+          <WorkScheduleTab />
         )}
       </main>
 
