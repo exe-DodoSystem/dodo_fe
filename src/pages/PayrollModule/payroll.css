@@ -1,0 +1,882 @@
+.payroll-module {
+  --primary: #f97316;
+  --primary-light: #fff7ed;
+  --bg-light: #f9fafb;
+  --text-main: #1e293b;
+  --text-muted: #64748b;
+  --border: #e2e8f0;
+  font-family: 'Montserrat', sans-serif;
+  background-color: var(--bg-light);
+  color: var(--text-main);
+  min-height: 100%;
+  padding: 2rem 1.5rem 3rem;
+}
+
+/* ─── Header ──────────────────────────────────────────────────────────────── */
+
+.pay-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.75rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.pay-header-left h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0 0 0.15rem;
+}
+
+.pay-header-left p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* ─── Year filter ─────────────────────────────────────────────────────────── */
+
+.pay-year-select {
+  padding: 0.5rem 0.85rem;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-main);
+  background: #fff;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.pay-year-select:focus {
+  border-color: var(--primary);
+}
+
+/* ─── Loading / Empty ─────────────────────────────────────────────────────── */
+
+.pay-loading,
+.pay-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 4rem 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.pay-loading .material-symbols-outlined,
+.pay-empty .material-symbols-outlined {
+  font-size: 2.5rem;
+  color: #cbd5e1;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.pay-spin {
+  animation: spin 0.9s linear infinite;
+}
+
+/* ─── Error banner ────────────────────────────────────────────────────────── */
+
+.pay-error {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.9rem 1.1rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #dc2626;
+  font-size: 0.875rem;
+  margin-bottom: 1.25rem;
+}
+
+/* ─── Payroll list ────────────────────────────────────────────────────────── */
+
+.pay-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.pay-card {
+  background: #fff;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  padding: 1.1rem 1.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.pay-card:hover {
+  border-color: var(--primary);
+  box-shadow: 0 2px 12px rgba(249, 115, 22, 0.1);
+}
+
+.pay-card-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.pay-card-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: var(--primary-light);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.pay-card-icon .material-symbols-outlined {
+  font-size: 1.35rem;
+}
+
+.pay-card-period {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0 0 0.2rem;
+}
+
+.pay-card-dept {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.pay-card-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.3rem;
+}
+
+.pay-card-amount {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+/* ─── Status badges ───────────────────────────────────────────────────────── */
+
+.pay-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.22rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.pay-badge .material-symbols-outlined {
+  font-size: 0.85rem;
+}
+
+.pay-badge-published {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.pay-badge-paid {
+  background: #dbeafe;
+  color: #1d6ced;
+}
+
+/* ─── Detail Modal overlay ────────────────────────────────────────────────── */
+
+.pay-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: fadeIn 0.15s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.pay-modal {
+  background: #fff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 540px;
+  max-height: 92vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+  animation: slideUp 0.18s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+.pay-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 1.4rem 1.5rem 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.pay-modal-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0 0 0.15rem;
+}
+
+.pay-modal-sub {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.pay-modal-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  padding: 0.2rem;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  transition: color 0.15s;
+}
+
+.pay-modal-close:hover {
+  color: var(--text-main);
+}
+
+.pay-modal-body {
+  padding: 1.25rem 1.5rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* ─── Section inside modal ────────────────────────────────────────────────── */
+
+.pay-section-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  margin: 0 0 0.65rem;
+}
+
+/* ─── Attendance grid ─────────────────────────────────────────────────────── */
+
+.pay-att-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.6rem;
+}
+
+.pay-att-item {
+  background: var(--bg-light);
+  border-radius: 8px;
+  padding: 0.65rem 0.75rem;
+  text-align: center;
+}
+
+.pay-att-value {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-main);
+  display: block;
+}
+
+.pay-att-label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  display: block;
+  margin-top: 0.1rem;
+}
+
+/* ─── Salary breakdown ────────────────────────────────────────────────────── */
+
+.pay-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.pay-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.65rem 1rem;
+  font-size: 0.875rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.pay-row:last-child {
+  border-bottom: none;
+}
+
+.pay-row-label {
+  color: var(--text-muted);
+}
+
+.pay-row-value {
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.pay-row-value.plus {
+  color: #16a34a;
+}
+
+.pay-row-value.minus {
+  color: #dc2626;
+}
+
+.pay-row-net {
+  background: var(--primary-light);
+  padding: 0.85rem 1rem;
+  font-size: 1rem;
+  font-weight: 700;
+  border-top: 2px solid #fed7aa;
+}
+
+.pay-row-net .pay-row-label {
+  color: var(--text-main);
+  font-weight: 700;
+}
+
+.pay-row-net .pay-row-value {
+  color: var(--primary);
+  font-size: 1.1rem;
+}
+
+/* ─── Notes ───────────────────────────────────────────────────────────────── */
+
+.pay-notes {
+  background: #fefce8;
+  border: 1px solid #fef08a;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  font-size: 0.85rem;
+  color: #713f12;
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+.pay-notes .material-symbols-outlined {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  margin-top: 0.05rem;
+  color: #ca8a04;
+}
+
+/* ─── Footer meta ─────────────────────────────────────────────────────────── */
+
+.pay-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.9rem 1.5rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* ─── Draft badge ─────────────────────────────────────────────────────────── */
+
+.pay-badge-draft {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+/* ─── Shared buttons ──────────────────────────────────────────────────────── */
+
+.pay-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.55rem 1.1rem;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.pay-btn-primary:hover:not(:disabled) {
+  background: #e06010;
+}
+
+.pay-btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.pay-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.55rem 1.1rem;
+  background: #fff;
+  color: var(--text-main);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.pay-btn-secondary:hover:not(:disabled) {
+  border-color: #94a3b8;
+}
+
+.pay-btn-secondary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.pay-btn-primary .material-symbols-outlined,
+.pay-btn-secondary .material-symbols-outlined {
+  font-size: 1.05rem;
+}
+
+/* ─── Manual fields form ──────────────────────────────────────────────────── */
+
+.pay-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.pay-field-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.pay-field-input {
+  padding: 0.55rem 0.85rem;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.875rem;
+  color: var(--text-main);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.pay-field-input:focus {
+  border-color: var(--primary);
+}
+
+.pay-field-textarea {
+  padding: 0.55rem 0.85rem;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.875rem;
+  color: var(--text-main);
+  outline: none;
+  resize: vertical;
+  transition: border-color 0.15s;
+}
+
+.pay-field-textarea:focus {
+  border-color: var(--primary);
+}
+
+/* ─── Preview box ─────────────────────────────────────────────────────────── */
+
+.pay-preview-box {
+  background: var(--primary-light);
+  border: 1.5px solid #fed7aa;
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  text-align: center;
+}
+
+.pay-preview-formula {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin: 0 0 0.2rem;
+  line-height: 1.6;
+  word-break: break-word;
+}
+
+.pay-preview-formula strong {
+  color: var(--primary);
+  font-size: 1rem;
+}
+
+.pay-preview-plus { color: #16a34a; }
+.pay-preview-minus { color: #dc2626; }
+
+.pay-preview-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* ─── Confirm Modal ───────────────────────────────────────────────────────── */
+
+.pay-confirm-modal {
+  background: #fff;
+  border-radius: 14px;
+  width: 100%;
+  max-width: 400px;
+  padding: 2rem 1.75rem 1.5rem;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+  text-align: center;
+  animation: slideUp 0.18s ease;
+}
+
+.pay-confirm-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #fef3c7;
+  color: #d97706;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+}
+
+.pay-confirm-icon .material-symbols-outlined {
+  font-size: 1.75rem;
+}
+
+.pay-confirm-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0 0 0.5rem;
+}
+
+.pay-confirm-msg {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin: 0 0 1.25rem;
+  line-height: 1.5;
+}
+
+.pay-confirm-err {
+  font-size: 0.82rem;
+  color: #dc2626;
+  margin: 0 0 0.75rem;
+}
+
+.pay-confirm-actions {
+  display: flex;
+  gap: 0.6rem;
+  justify-content: center;
+}
+
+/* ─── HR Tab wrapper ──────────────────────────────────────────────────────── */
+
+.hr-pay-wrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 2rem 1.5rem 3rem;
+}
+
+/* ─── Toast ───────────────────────────────────────────────────────────────── */
+
+.hr-pay-toast {
+  position: fixed;
+  top: 1.5rem;
+  right: 1.5rem;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.8rem 1.2rem;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  animation: slideUp 0.2s ease;
+}
+
+.hr-pay-toast-success {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+.hr-pay-toast-error {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
+.hr-pay-toast .material-symbols-outlined {
+  font-size: 1.1rem;
+}
+
+/* ─── Toolbar ─────────────────────────────────────────────────────────────── */
+
+.hr-pay-toolbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.hr-pay-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0 0 0.15rem;
+}
+
+.hr-pay-subtitle {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.hr-pay-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+/* ─── Filter bar ──────────────────────────────────────────────────────────── */
+
+.hr-pay-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+/* ─── Table ───────────────────────────────────────────────────────────────── */
+
+.hr-pay-table-wrap {
+  overflow-x: auto;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  background: #fff;
+}
+
+.hr-pay-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  min-width: 860px;
+}
+
+.hr-pay-table thead tr {
+  background: #f8fafc;
+  border-bottom: 2px solid var(--border);
+}
+
+.hr-pay-table th {
+  padding: 0.75rem 1rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.hr-pay-th-center { text-align: center !important; }
+.hr-pay-th-right  { text-align: right  !important; }
+
+.hr-pay-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-main);
+  vertical-align: middle;
+}
+
+.hr-pay-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.hr-pay-table tbody tr:hover {
+  background: #fafafa;
+}
+
+.hr-pay-row-2 td { opacity: 0.75; }
+
+/* ─── Sortable header button ──────────────────────────────────────────────── */
+
+.hr-pay-th-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0;
+  transition: color 0.15s;
+}
+
+.hr-pay-th-sort:hover {
+  color: var(--text-main);
+}
+
+.hr-pay-th-sort .material-symbols-outlined {
+  font-size: 0.95rem;
+}
+
+/* ─── Cell variants ───────────────────────────────────────────────────────── */
+
+.hr-pay-emp-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.hr-pay-emp-name {
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.hr-pay-emp-code {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.hr-pay-dept   { color: var(--text-muted); white-space: nowrap; }
+.hr-pay-center { text-align: center; }
+.hr-pay-right  { text-align: right; }
+.hr-pay-minus  { color: #dc2626; font-weight: 600; }
+.hr-pay-plus   { color: #16a34a; font-weight: 600; }
+.hr-pay-net    { font-weight: 700; color: var(--text-main); }
+.hr-pay-absent { color: #dc2626; font-size: 0.78rem; }
+
+/* ─── Action buttons ──────────────────────────────────────────────────────── */
+
+.hr-pay-actions {
+  display: flex;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.hr-pay-act-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 7px;
+  border: 1.5px solid var(--border);
+  background: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  color: var(--text-muted);
+}
+
+.hr-pay-act-btn .material-symbols-outlined {
+  font-size: 1rem;
+}
+
+.hr-pay-act-edit:hover    { background: #eff6ff; border-color: #3b82f6; color: #3b82f6; }
+.hr-pay-act-calc:hover    { background: #fefce8; border-color: #ca8a04; color: #ca8a04; }
+.hr-pay-act-publish:hover { background: #f0fdf4; border-color: #16a34a; color: #16a34a; }
+.hr-pay-act-paid:hover    { background: #eff6ff; border-color: #1d6ced; color: #1d6ced; }
+
+/* ─── Pagination ──────────────────────────────────────────────────────────── */
+
+.hr-pay-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding-top: 0.25rem;
+}
+
+.hr-pay-page-info {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.hr-pay-page-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.hr-pay-page-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
+  background: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.hr-pay-page-btn:hover:not(:disabled) {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.hr-pay-page-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.hr-pay-page-btn .material-symbols-outlined {
+  font-size: 1.1rem;
+}
+
+.hr-pay-page-num {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-main);
+  min-width: 50px;
+  text-align: center;
+}

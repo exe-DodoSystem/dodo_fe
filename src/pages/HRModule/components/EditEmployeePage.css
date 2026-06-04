@@ -1,0 +1,493 @@
+/* ============================================================
+   Edit Employee Page
+   ============================================================ */
+
+.edit-page {
+    background: #f5f7fb;
+    font-family: 'Inter', sans-serif;
+}
+
+/* ---------- Header ---------- */
+.edit-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid #e5e7eb;
+    padding: 0 24px;
+}
+
+.edit-header-inner {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    height: 64px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.edit-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    background: white;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #475569;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-family: 'Inter', sans-serif;
+    white-space: nowrap;
+}
+
+.edit-back-btn:hover {
+    border-color: var(--primary, #1d6ced);
+    color: var(--primary, #1d6ced);
+    background: #f0f7ff;
+}
+
+.edit-back-btn .material-symbols-outlined {
+    font-size: 18px;
+}
+
+.edit-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: var(--primary, #1d6ced);
+    border-radius: 10px;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(29, 108, 237, 0.25);
+}
+
+.edit-logo .material-symbols-outlined {
+    font-size: 20px;
+}
+
+.edit-logo-text {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #1e293b;
+    letter-spacing: -0.02em;
+}
+
+.edit-logo-text span {
+    color: var(--primary, #1d6ced);
+}
+
+.edit-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: auto;
+}
+
+.edit-breadcrumb-link {
+    font-size: 0.85rem;
+    color: var(--primary, #1d6ced);
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.edit-breadcrumb-link:hover {
+    text-decoration: underline;
+}
+
+.edit-breadcrumb-sep {
+    font-size: 16px;
+    color: #94a3b8;
+}
+
+.edit-breadcrumb-current {
+    font-size: 0.85rem;
+    color: #1e293b;
+    font-weight: 700;
+}
+
+/* ---------- Main ---------- */
+.edit-main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 32px 24px 64px;
+}
+
+.edit-page-title-wrap {
+    margin-bottom: 28px;
+}
+
+.edit-page-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 6px;
+}
+
+.edit-page-subtitle {
+    font-size: 0.9rem;
+    color: #64748b;
+}
+
+/* ---------- Layout ---------- */
+.edit-form-layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+@media (max-width: 768px) {
+    .edit-form-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ---------- Left: Avatar card ---------- */
+.edit-avatar-card {
+    background: white;
+    border-radius: 20px;
+    border: 1px solid #e5e7eb;
+    padding: 28px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+    position: sticky;
+    top: 88px;
+}
+
+.edit-avatar-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.edit-avatar-circle {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 2rem;
+    font-weight: 800;
+    color: white;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    flex-shrink: 0;
+}
+
+.edit-avatar-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.edit-avatar-btn {
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.15s ease;
+}
+
+.edit-avatar-btn.primary {
+    background: #eff6ff;
+    color: #1d6ced;
+}
+.edit-avatar-btn.primary:hover {
+    background: #dbeafe;
+}
+
+.edit-avatar-btn.danger {
+    background: #fff1f2;
+    color: #e11d48;
+}
+.edit-avatar-btn.danger:hover {
+    background: #ffe4e6;
+}
+
+.edit-avatar-info {
+    text-align: center;
+    width: 100%;
+    border-top: 1px solid #f1f3f5;
+    padding-top: 16px;
+}
+
+.edit-avatar-name {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 4px;
+    word-break: break-word;
+}
+
+.edit-avatar-meta {
+    font-size: 0.78rem;
+    color: #94a3b8;
+    margin-bottom: 10px;
+}
+
+.edit-avatar-meta strong {
+    color: #64748b;
+}
+
+.edit-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 14px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+}
+
+.edit-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+/* ---------- Right: Form ---------- */
+.edit-right-col {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.edit-section-card {
+    background: white;
+    border-radius: 20px;
+    border: 1px solid #e5e7eb;
+    padding: 24px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+}
+
+.edit-section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.edit-section-icon {
+    font-size: 20px;
+    color: var(--primary, #1d6ced);
+    background: #eff6ff;
+    padding: 6px;
+    border-radius: 8px;
+}
+
+.edit-section-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1rem;
+    font-weight: 800;
+    color: #1e293b;
+}
+
+/* ---------- Fields ---------- */
+.edit-fields-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.edit-field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.edit-field-group.full-width {
+    grid-column: 1 / -1;
+}
+
+@media (max-width: 560px) {
+    .edit-fields-grid {
+        grid-template-columns: 1fr;
+    }
+    .edit-field-group.full-width {
+        grid-column: 1;
+    }
+}
+
+.edit-label {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #475569;
+    font-family: 'Inter', sans-serif;
+}
+
+.edit-required {
+    color: #e11d48;
+    margin-left: 2px;
+}
+
+.edit-input,
+.edit-select,
+.edit-textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 10px;
+    font-size: 0.875rem;
+    font-family: 'Inter', sans-serif;
+    color: #1e293b;
+    background: #fafbfc;
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    box-sizing: border-box;
+}
+
+.edit-input:focus,
+.edit-select:focus,
+.edit-textarea:focus {
+    border-color: var(--primary, #1d6ced);
+    box-shadow: 0 0 0 3px rgba(29, 108, 237, 0.1);
+    background: white;
+}
+
+.edit-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+}
+
+.edit-textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+/* ---------- Status radio group ---------- */
+.edit-status-group {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.edit-status-option {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 18px;
+    border-radius: 10px;
+    border: 1.5px solid #e5e7eb;
+    background: #fafbfc;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #475569;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.edit-status-option:hover {
+    border-color: #94a3b8;
+    background: #f1f5f9;
+}
+
+.edit-status-option.selected {
+    border-color: var(--primary, #1d6ced);
+    background: #eff6ff;
+    color: #1e293b;
+    box-shadow: 0 0 0 2px rgba(29, 108, 237, 0.12);
+}
+
+.edit-status-dot-sm {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+/* ---------- Action row ---------- */
+.edit-actions-row {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding-top: 4px;
+}
+
+.edit-btn-cancel {
+    padding: 10px 24px;
+    border-radius: 10px;
+    border: 1.5px solid #e5e7eb;
+    background: white;
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #475569;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.15s ease;
+}
+
+.edit-btn-cancel:hover {
+    border-color: #94a3b8;
+    color: #1e293b;
+}
+
+.edit-btn-save {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 24px;
+    border-radius: 10px;
+    border: none;
+    background: var(--primary, #1d6ced);
+    color: white;
+    font-size: 0.875rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.15s ease;
+    box-shadow: 0 4px 14px rgba(29, 108, 237, 0.3);
+}
+
+.edit-btn-save:hover {
+    background: var(--primary-dark, #1656c2);
+    box-shadow: 0 6px 18px rgba(29, 108, 237, 0.4);
+    transform: translateY(-1px);
+}
+
+.edit-btn-save .material-symbols-outlined {
+    font-size: 18px;
+}
+
+/* ---------- Not found state ---------- */
+.edit-notfound-icon {
+    font-size: 64px;
+    color: #94a3b8;
+    display: block;
+    margin-bottom: 12px;
+}
+
+.edit-notfound-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 8px;
+}
+
+.edit-notfound-desc {
+    font-size: 0.9rem;
+    color: #64748b;
+    margin-bottom: 24px;
+}

@@ -1,22 +1,60 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import LandingPage from '../pages/LandingPage';
 import LoginPage from '../pages/LoginPage';
+import RegisterPage from '../pages/RegisterPage';
 import ProductsPage from '../pages/ProductsPage';
+import AppLayout from '../layouts/AppLayout';
+import ProtectedRoute from './ProtectedRoute';
+import RoleRoute from './RoleRoute';
+import DashboardPage from '../pages/DashboardPage';
 import HRModule from '../pages/HRModule';
+import EditEmployeePage from '../pages/HRModule/components/EditEmployeePage';
 import AttendanceModule from '../pages/AttendanceModule';
-import CRMModule from '../pages/CRMModule';
-import InventoryModule from '../pages/InventoryModule';
+import PayrollModule from '../pages/PayrollModule';
+import ModuleManagerPage from '../pages/ModuleManagerPage';
+import InviteCompletePage from '../pages/InviteCompletePage';
 
 export default function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
       <Route path="/products" element={<ProductsPage />} />
-      <Route path="/modules/hr" element={<HRModule />} />
-      <Route path="/modules/attendance" element={<AttendanceModule />} />
-      <Route path="/modules/crm" element={<CRMModule />} />
-      <Route path="/modules/inventory" element={<InventoryModule />} />
+      <Route path="/invite/complete" element={<InviteCompletePage />} />
+
+      <Route
+        path="/app"
+        element={
+          <ProtectedRoute>
+            <AppLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<Navigate to="/app/dashboard" replace />} />
+        <Route path="dashboard" element={<DashboardPage />} />
+        <Route
+          path="hr"
+          element={
+            <RoleRoute allowedRoles={['TenantAdmin', 'Manager', 'HRManager']}>
+              <HRModule />
+            </RoleRoute>
+          }
+        />
+        <Route
+          path="hr/edit/:id"
+          element={
+            <RoleRoute allowedRoles={['TenantAdmin', 'Manager', 'HRManager']}>
+              <EditEmployeePage />
+            </RoleRoute>
+          }
+        />
+        <Route path="attendance" element={<AttendanceModule />} />
+        <Route path="payroll" element={<PayrollModule />} />
+        <Route path="modules" element={<ModuleManagerPage />} />
+      </Route>
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
+
