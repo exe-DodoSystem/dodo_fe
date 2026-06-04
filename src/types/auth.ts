@@ -3,8 +3,7 @@ export type Role = 'TenantAdmin' | 'Manager' | 'HRManager' | 'Employee';
 export type ModuleId =
   | 'hr'
   | 'attendance'
-  | 'sales'
-  | 'tasks'
+  | 'payroll'
   | 'dashboard';
 
 export interface User {
@@ -44,7 +43,7 @@ export const ALL_MODULES: ModuleDefinition[] = [
     icon: 'badge',
     path: '/app/hr',
     color: '#1d6ced',
-    description: 'Quản lý nhân sự cơ bản',
+    description: 'Module quản lý nhân sự',
     monthlyPrice: 150000,
   },
   {
@@ -54,37 +53,27 @@ export const ALL_MODULES: ModuleDefinition[] = [
     icon: 'calendar_month',
     path: '/app/attendance',
     color: '#10b981',
-    description: 'Chấm công & Tính lương',
+    description: 'Module quản lý chấm công',
     monthlyPrice: 180000,
   },
   {
-    id: 'sales',
+    id: 'payroll',
     numericId: 3,
-    label: 'Sales & CRM',
-    icon: 'groups',
-    path: '/app/crm',
-    color: '#6366f1',
-    description: 'Quản lý khách hàng & Đơn hàng',
+    label: 'Bảng lương',
+    icon: 'payments',
+    path: '/app/payroll',
+    color: '#f97316',
+    description: 'Module quản lý bảng lương',
     monthlyPrice: 180000,
-  },
-  {
-    id: 'tasks',
-    numericId: 4,
-    label: 'Quản lý công việc',
-    icon: 'assignment',
-    path: '/app/tasks',
-    color: '#06b6d4',
-    description: 'Quản lý công việc & Dự án',
-    monthlyPrice: 150000,
   },
   {
     id: 'dashboard',
-    numericId: 5,
+    numericId: 4,
     label: 'Dashboard & Báo cáo',
     icon: 'monitoring',
     path: '/app/dashboard',
-    color: '#f97316',
-    description: 'Dashboard & Báo cáo tổng quan',
+    color: '#6366f1',
+    description: 'Module quản lý Dashboard & Báo cáo',
     monthlyPrice: 120000,
   },
 ];
@@ -92,14 +81,13 @@ export const ALL_MODULES: ModuleDefinition[] = [
 export const MODULE_ID_MAP: Record<number, ModuleId> = {
   1: 'hr',
   2: 'attendance',
-  3: 'sales',
-  4: 'tasks',
-  5: 'dashboard',
+  3: 'payroll',
+  4: 'dashboard',
 };
 
 export const ROLE_MODULE_ACCESS: Record<Role, ModuleId[]> = {
-  TenantAdmin: ['hr', 'attendance', 'sales', 'tasks', 'dashboard'],
-  Manager:     ['hr', 'attendance', 'sales', 'tasks'],
-  HRManager:   ['hr', 'attendance', 'tasks'],
-  Employee:    ['attendance', 'tasks'],
+  TenantAdmin: ['hr', 'attendance', 'payroll', 'dashboard'],
+  Manager:     ['hr', 'attendance', 'payroll'],
+  HRManager:   ['hr', 'attendance', 'payroll'],
+  Employee:    ['attendance', 'payroll'],
 };

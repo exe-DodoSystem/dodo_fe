@@ -32,6 +32,10 @@ export default function InviteStaffModal({
   const [positions, setPositions] = useState<Position[]>([]);
   const [roles, setRoles] = useState<HrRole[]>([]);
 
+  const isHRManager =
+    !!roleId &&
+    roles.find((r) => r.id === Number(roleId))?.name === 'HRManager';
+
   const [loadingDepts, setLoadingDepts] = useState(false);
   const [loadingPos, setLoadingPos] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -183,7 +187,12 @@ export default function InviteStaffModal({
                 <select
                   className="invite-select"
                   value={roleId}
-                  onChange={(e) => setRoleId(e.target.value)}
+                  onChange={(e) => {
+                    setRoleId(e.target.value);
+                    setDepartmentId('');
+                    setPositionId('');
+                    setPositions([]);
+                  }}
                   required
                   disabled={submitting || success || loadingDepts}
                 >
@@ -230,6 +239,12 @@ export default function InviteStaffModal({
                     expand_more
                   </span>
                 </div>
+                {isHRManager && (
+                  <p className="invite-hint">
+                    <span className="material-symbols-outlined">info</span>
+                    HR Manager phải thuộc phòng ban nhân sự của công ty
+                  </p>
+                )}
               </div>
 
               <div className="invite-field">

@@ -230,6 +230,11 @@
   color: #a78bfa;
 }
 
+.sidebar-role-badge.HRManager {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+}
+
 .sidebar-role-badge.Employee {
   background: rgba(100, 116, 139, 0.25);
   color: #94a3b8;

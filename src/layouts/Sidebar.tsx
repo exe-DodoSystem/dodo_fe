@@ -145,6 +145,8 @@ export default function Sidebar() {
                 ? 'Admin'
                 : user.role === 'Manager'
                 ? 'Manager'
+                : user.role === 'HRManager'
+                ? 'HR Manager'
                 : 'Employee'}
             </span>
           </div>

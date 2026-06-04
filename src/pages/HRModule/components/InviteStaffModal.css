@@ -267,6 +267,21 @@
   border: 1px solid #fecaca;
 }
 
+.invite-hint {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 6px;
+  font-size: 12px;
+  color: #2563eb;
+  font-family: 'Inter', sans-serif;
+}
+
+.invite-hint .material-symbols-outlined {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
 /* ── Footer ── */
 
 .invite-modal-footer {

@@ -10,10 +10,7 @@ import DashboardPage from '../pages/DashboardPage';
 import HRModule from '../pages/HRModule';
 import EditEmployeePage from '../pages/HRModule/components/EditEmployeePage';
 import AttendanceModule from '../pages/AttendanceModule';
-import CRMModule from '../pages/CRMModule';
-import CustomerDetailPage from '../pages/CRMModule/components/CustomerDetailPage';
-import EditCustomerPage from '../pages/CRMModule/components/EditCustomerPage';
-import InventoryModule from '../pages/InventoryModule';
+import PayrollModule from '../pages/PayrollModule';
 import ModuleManagerPage from '../pages/ModuleManagerPage';
 import InviteCompletePage from '../pages/InviteCompletePage';
 
@@ -53,10 +50,7 @@ export default function AppRoutes() {
           }
         />
         <Route path="attendance" element={<AttendanceModule />} />
-        <Route path="crm" element={<CRMModule />} />
-        <Route path="crm/:id" element={<CustomerDetailPage />} />
-        <Route path="crm/edit/:id" element={<EditCustomerPage />} />
-        <Route path="inventory" element={<InventoryModule />} />
+        <Route path="payroll" element={<PayrollModule />} />
         <Route path="modules" element={<ModuleManagerPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
