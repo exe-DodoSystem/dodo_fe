@@ -48,19 +48,6 @@ export default function Sidebar() {
 
       {/* Nav */}
       <nav className="sidebar-nav">
-        {/* Dashboard */}
-        <NavLink
-          to="/app/dashboard"
-          className={({ isActive }) =>
-            `sidebar-nav-item${isActive ? ' active' : ''}`
-          }
-        >
-          <span className="material-symbols-outlined sidebar-nav-icon">dashboard</span>
-          Dashboard
-        </NavLink>
-
-        <div className="sidebar-divider" />
-
         {/* Accessible Modules */}
         {accessibleModules.length > 0 && (
           <>
@@ -103,7 +90,7 @@ export default function Sidebar() {
           </>
         )}
 
-        {/* Settings + Module Manager (TenantAdmin only) */}
+        {/* Module Manager (TenantAdmin only) */}
         {isTenantAdmin && (
           <>
             <div className="sidebar-divider" style={{ marginTop: 8 }} />
@@ -115,15 +102,6 @@ export default function Sidebar() {
             >
               <span className="material-symbols-outlined sidebar-nav-icon">extension</span>
               Quản lý Module
-            </NavLink>
-            <NavLink
-              to="/app/settings"
-              className={({ isActive }) =>
-                `sidebar-nav-item${isActive ? ' active' : ''}`
-              }
-            >
-              <span className="material-symbols-outlined sidebar-nav-icon">settings</span>
-              Cài đặt
             </NavLink>
           </>
         )}

@@ -87,7 +87,7 @@ export const MODULE_ID_MAP: Record<number, ModuleId> = {
 
 export const ROLE_MODULE_ACCESS: Record<Role, ModuleId[]> = {
   TenantAdmin: ['hr', 'attendance', 'payroll', 'dashboard'],
-  Manager:     ['hr', 'attendance', 'payroll'],
-  HRManager:   ['hr', 'attendance', 'payroll'],
-  Employee:    ['attendance', 'payroll'],
+  Manager:     ['hr', 'attendance', 'payroll', 'dashboard'],
+  HRManager:   ['hr', 'attendance', 'payroll', 'dashboard'],
+  Employee:    ['attendance', 'payroll', 'dashboard'],
 };
