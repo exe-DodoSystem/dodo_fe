@@ -1,13 +1,16 @@
-import { Outlet, useLocation } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import { useAuth } from '../contexts/AuthContext';
 import { ALL_MODULES } from '../types/auth';
+import UserAvatar from '../components/UserAvatar';
+import NotificationDropdown from '../components/NotificationDropdown';
 import './AppLayout.css';
 
 function getBreadcrumb(pathname: string) {
   if (pathname === '/app/dashboard') return { parent: 'DODO System', current: 'Dashboard' };
   if (pathname === '/app/modules')   return { parent: 'DODO System', current: 'Quản lý Module' };
   if (pathname === '/app/settings')  return { parent: 'DODO System', current: 'Cài đặt' };
+  if (pathname === '/app/profile')   return { parent: 'DODO System', current: 'Hồ sơ cá nhân' };
   const mod = ALL_MODULES.find((m) => pathname.startsWith(m.path));
   if (mod) {
     if (pathname.includes('/edit/')) return { parent: mod.label, current: 'Chỉnh sửa' };
@@ -20,11 +23,8 @@ function getBreadcrumb(pathname: string) {
 export default function AppLayout() {
   const { user } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const breadcrumb = getBreadcrumb(location.pathname);
-
-  const initials = user
-    ? user.name.split(' ').slice(-2).map((w) => w.charAt(0)).join('')
-    : '?';
 
   return (
     <div className="app-shell">
@@ -41,21 +41,20 @@ export default function AppLayout() {
           </div>
 
           <div className="app-topbar-right">
-            <button className="app-topbar-icon-btn" title="Thông báo">
-              <span className="material-symbols-outlined">notifications</span>
-              <span className="app-topbar-notif-dot" />
-            </button>
+            <NotificationDropdown />
             <button className="app-topbar-icon-btn" title="Tìm kiếm">
               <span className="material-symbols-outlined">search</span>
             </button>
             {user && (
-              <div
+              <UserAvatar
+                name={user.name}
+                avatarUrl={user.avatarUrl}
+                avatarColor={user.avatarColor}
+                size={36}
                 className="app-topbar-avatar"
-                style={{ backgroundColor: user.avatarColor }}
-                title={user.name}
-              >
-                {initials}
-              </div>
+                onClick={() => navigate('/app/profile')}
+                style={{ cursor: 'pointer' }}
+              />
             )}
           </div>
         </header>

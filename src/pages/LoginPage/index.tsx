@@ -12,7 +12,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const from = (location.state as { from?: { pathname: string } })?.from?.pathname || "/app/dashboard";
+  const from = (location.state as { from?: { pathname: string } })?.from?.pathname;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,7 +21,12 @@ export default function LoginPage() {
     const result = await login(email, password);
     setLoading(false);
     if (result.success) {
-      navigate(from, { replace: true });
+      // SystemAdmin đi vào /system, các role khác đi vào /app
+      if (result.role === 'SystemAdmin') {
+        navigate('/system/dashboard', { replace: true });
+      } else {
+        navigate(from && from !== '/login' ? from : '/app/hr', { replace: true });
+      }
     } else {
       setError(result.error || "Đăng nhập thất bại.");
     }

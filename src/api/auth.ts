@@ -54,3 +54,30 @@ export interface RegisterRequest {
 export async function registerApi(data: RegisterRequest): Promise<void> {
   await axiosClient.post('/api/Auth/register', data);
 }
+
+// ─── User Profile ─────────────────────────────────────────────────────────────
+
+export interface UserProfileDto {
+  fullName: string;
+  phone: string;
+  avatarUrl: string | null;
+  isActive: boolean;
+  isDeleted: boolean;
+  tenantName: string;
+}
+
+// GET /api/User/me
+export async function getUserProfile(): Promise<UserProfileDto> {
+  const res = await axiosClient.get<UserProfileDto>('/api/User/me');
+  return res.data;
+}
+
+// PUT /api/User/me/avatar
+export async function updateAvatarApi(file: File): Promise<UserProfileDto> {
+  const formData = new FormData();
+  formData.append('avatar', file);
+  const res = await axiosClient.put<UserProfileDto>('/api/User/me/avatar', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+  return res.data;
+}

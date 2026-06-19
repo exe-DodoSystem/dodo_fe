@@ -1,7 +1,7 @@
-import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
 import type { User, Tenant, ModuleId } from '../types/auth';
 import { ROLE_MODULE_ACCESS, MODULE_ID_MAP } from '../types/auth';
-import { loginApi, getMyModulesApi } from '../api/auth';
+import { loginApi, getMyModulesApi, getUserProfile, updateAvatarApi } from '../api/auth';
 
 function decodeJwtPayload(token: string): Record<string, unknown> {
   try {
@@ -16,9 +16,11 @@ interface AuthContextType {
   user: User | null;
   tenant: Tenant | null;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  login: (email: string, password: string) => Promise<{ success: boolean; error?: string; role?: string }>;
   logout: () => void;
   refreshModules: () => Promise<void>;
+  updateUserAvatar: (url: string) => void;
+  uploadAvatar: (file: File) => Promise<string>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -61,24 +63,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         avatarColor: '#1d6ced',
         phone: authData.phone,
         isActive: authData.isActive,
+        avatarUrl: null,
       };
 
-      // 5. Gọi API lấy danh sách module đã đăng ký (token đã có trong localStorage)
-      const subscriptions = await getMyModulesApi();
-      const purchasedModules: ModuleId[] = subscriptions
-        .filter((s) => s.status !== 'Expired')
-        .map((s) => MODULE_ID_MAP[s.moduleId])
-        .filter((m): m is ModuleId => m !== undefined);
+      // 5. Gọi API lấy danh sách module (SystemAdmin không có tenant modules)
+      let purchasedModules: ModuleId[] = [];
+      let trialModules: ModuleId[] = [];
 
-      const trialModules: ModuleId[] = subscriptions
-        .filter((s) => s.status === 'Trial')
-        .map((s) => MODULE_ID_MAP[s.moduleId])
-        .filter((m): m is ModuleId => m !== undefined);
+      if (role !== 'SystemAdmin') {
+        const subscriptions = await getMyModulesApi();
+        purchasedModules = subscriptions
+          .filter((s) => s.status !== 'Expired')
+          .map((s) => MODULE_ID_MAP[s.moduleId])
+          .filter((m): m is ModuleId => m !== undefined);
+        trialModules = subscriptions
+          .filter((s) => s.status === 'Trial')
+          .map((s) => MODULE_ID_MAP[s.moduleId])
+          .filter((m): m is ModuleId => m !== undefined);
+      }
 
       // 6. Tạo Tenant object
       const tenantData: Tenant = {
         id: tenantId as unknown as number,
-        name: authData.tenantName,
+        name: authData.tenantName || 'DODO System',
         purchasedModules,
         trialModules,
       };
@@ -89,7 +96,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.setItem('dodo_user', JSON.stringify(userData));
       localStorage.setItem('dodo_tenant', JSON.stringify(tenantData));
 
-      return { success: true };
+      // 8. Lấy avatarUrl từ server (best-effort, không block login)
+      getUserProfile().then((profile) => {
+        setUser((prev) => {
+          if (!prev) return prev;
+          const withAvatar = { ...prev, avatarUrl: profile.avatarUrl, phone: profile.phone };
+          localStorage.setItem('dodo_user', JSON.stringify(withAvatar));
+          return withAvatar;
+        });
+      }).catch(() => {});
+
+      return { success: true, role };
     } catch (error: unknown) {
       const axiosError = error as {
         response?: { data?: { message?: string; title?: string } };
@@ -102,6 +119,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  // On startup: if already logged in, refresh avatarUrl from server
+  useEffect(() => {
+    const token = localStorage.getItem('dodo_token');
+    if (!token) return;
+    getUserProfile()
+      .then((profile) => {
+        setUser((prev) => {
+          if (!prev) return prev;
+          const updated = { ...prev, avatarUrl: profile.avatarUrl, phone: profile.phone };
+          localStorage.setItem('dodo_user', JSON.stringify(updated));
+          return updated;
+        });
+      })
+      .catch(() => { /* silent — stale token will be caught by interceptor */ });
+  }, []);
+
+  const updateUserAvatar = useCallback((url: string) => {
+    setUser((prev) => {
+      if (!prev) return prev;
+      const updated = { ...prev, avatarUrl: url };
+      localStorage.setItem('dodo_user', JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
+  const uploadAvatar = useCallback(async (file: File): Promise<string> => {
+    const profile = await updateAvatarApi(file);
+    updateUserAvatar(profile.avatarUrl ?? '');
+    return profile.avatarUrl ?? '';
+  }, [updateUserAvatar]);
+
   const logout = useCallback(() => {
     setUser(null);
     setTenant(null);
@@ -112,6 +160,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const refreshModules = useCallback(async () => {
+    if (user?.role === 'SystemAdmin') return; // SystemAdmin không có tenant modules
     try {
       const subscriptions = await getMyModulesApi();
       const purchasedModules: ModuleId[] = subscriptions
@@ -137,7 +186,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, tenant, isAuthenticated: !!user, login, logout, refreshModules }}
+      value={{ user, tenant, isAuthenticated: !!user, login, logout, refreshModules, updateUserAvatar, uploadAvatar }}
     >
       {children}
     </AuthContext.Provider>

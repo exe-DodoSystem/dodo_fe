@@ -1,0 +1,165 @@
+/* Loading */
+.sys-dash-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 50vh;
+}
+
+/* Page */
+.sys-dash {
+  max-width: 960px;
+}
+
+.sys-dash-header {
+  margin-bottom: 28px;
+}
+
+.sys-dash-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #0f172a;
+  font-family: 'Montserrat', sans-serif;
+  margin: 0 0 4px;
+}
+
+.sys-dash-subtitle {
+  font-size: 14px;
+  color: #64748b;
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+}
+
+/* Stat grid */
+.sys-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.sys-stat-card {
+  background: white;
+  border-radius: 14px;
+  padding: 20px;
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  border: 1px solid #f1f5f9;
+}
+
+.sys-stat-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sys-stat-icon .material-symbols-outlined {
+  font-size: 22px !important;
+}
+
+.sys-stat-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.sys-stat-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #94a3b8;
+  font-family: 'Inter', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 4px;
+}
+
+.sys-stat-value {
+  font-size: 28px;
+  font-weight: 800;
+  color: #0f172a;
+  font-family: 'Montserrat', sans-serif;
+  margin: 0 0 2px;
+  line-height: 1.1;
+}
+
+.sys-stat-note {
+  font-size: 12px;
+  color: #94a3b8;
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+}
+
+/* Section */
+.sys-dash-section {
+  background: white;
+  border-radius: 14px;
+  padding: 22px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  border: 1px solid #f1f5f9;
+}
+
+.sys-dash-section-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+  font-family: 'Montserrat', sans-serif;
+  margin: 0 0 16px;
+}
+
+/* Quick links */
+.sys-quick-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.sys-quick-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.sys-quick-card:hover {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.sys-quick-icon {
+  font-size: 24px !important;
+  color: #7c3aed;
+  flex-shrink: 0;
+}
+
+.sys-quick-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1e293b;
+  font-family: 'Inter', sans-serif;
+  margin: 0 0 2px;
+}
+
+.sys-quick-desc {
+  font-size: 12px;
+  color: #64748b;
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+}
+
+.sys-quick-arrow {
+  font-size: 18px !important;
+  color: #94a3b8;
+  margin-left: auto;
+  flex-shrink: 0;
+}

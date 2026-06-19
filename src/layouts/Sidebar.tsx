@@ -2,6 +2,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { ALL_MODULES, ROLE_MODULE_ACCESS } from '../types/auth';
 import type { ModuleId } from '../types/auth';
+import UserAvatar from '../components/UserAvatar';
 
 export default function Sidebar() {
   const { user, tenant, logout } = useAuth();
@@ -28,11 +29,6 @@ export default function Sidebar() {
     navigate('/');
   };
 
-  const initials = user.name
-    .split(' ')
-    .slice(-2)
-    .map((w) => w.charAt(0))
-    .join('');
 
   return (
     <aside className="sidebar">
@@ -110,12 +106,14 @@ export default function Sidebar() {
       {/* User card */}
       <div className="sidebar-user-card">
         <div className="sidebar-user-inner">
-          <div
+          <UserAvatar
+            name={user.name}
+            avatarUrl={user.avatarUrl}
+            avatarColor={user.avatarColor}
+            size={36}
             className="sidebar-user-avatar"
-            style={{ backgroundColor: user.avatarColor }}
-          >
-            {initials}
-          </div>
+            onClick={() => navigate('/app/profile')}
+          />
           <div className="sidebar-user-info">
             <p className="sidebar-user-name">{user.name}</p>
             <span className={`sidebar-role-badge ${user.role}`}>
