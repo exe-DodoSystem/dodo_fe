@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import ModuleModal from "../../components/ModuleModal";
+import { ALL_MODULES } from "../../types/auth";
 import "./landing.css";
 
 export default function LandingPage() {
@@ -8,47 +9,16 @@ export default function LandingPage() {
   const [selectedModules, setSelectedModules] = useState<number[]>([1, 2]);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const modules = [
-    {
-      id: 1,
-      title: "Nhân sự (HR)",
-      desc: "Quản lý nhân sự cơ bản — hồ sơ, hợp đồng, phân quyền.",
-      icon: "badge",
-    },
-    {
-      id: 2,
-      title: "Chấm công",
-      desc: "Chấm công đa hình thức: GPS, Wifi, khuôn mặt. Tính lương tự động.",
-      icon: "calendar_month",
-    },
-    {
-      id: 3,
-      title: "Sales & CRM",
-      desc: "Quản lý khách hàng, đơn hàng và phễu bán hàng toàn diện.",
-      icon: "groups",
-    },
-    {
-      id: 4,
-      title: "Quản lý công việc",
-      desc: "Giao việc, theo dõi tiến độ và báo cáo hiệu suất tức thì.",
-      icon: "assignment",
-    },
-    {
-      id: 5,
-      title: "Dashboard & Báo cáo",
-      desc: "Hệ thống Dashboard trực quan hỗ trợ ra quyết định nhanh.",
-      icon: "monitoring",
-    },
-  ];
-
   const toggleModule = (id: number) => {
     setSelectedModules((prev) =>
       prev.includes(id) ? prev.filter((m) => m !== id) : [...prev, id],
     );
   };
 
-  const MODULE_PRICES: Record<number, number> = { 1: 150000, 2: 180000, 3: 180000, 4: 150000, 5: 120000 };
-  const price = selectedModules.reduce((sum, id) => sum + (MODULE_PRICES[id] ?? 0), 0);
+  const price = selectedModules.reduce((sum, id) => {
+    const mod = ALL_MODULES.find(m => m.numericId === id);
+    return sum + (mod?.monthlyPrice ?? 0);
+  }, 0);
 
   return (
     <div className="landing-page min-h-screen flex flex-col">
@@ -157,30 +127,30 @@ export default function LandingPage() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-              {modules.map((module) => (
+              {ALL_MODULES.map((module) => (
                 <div
-                  key={module.id}
-                  onClick={() => toggleModule(module.id)}
-                  className={`module-card bg-white p-8 rounded-2xl shadow-sm border ${selectedModules.includes(module.id) ? "selected border-[var(--primary)]" : "border-gray-100"} flex flex-col items-center text-center`}
+                  key={module.numericId}
+                  onClick={() => toggleModule(module.numericId)}
+                  className={`module-card bg-white p-8 rounded-2xl shadow-sm border ${selectedModules.includes(module.numericId) ? "selected border-[var(--primary)]" : "border-gray-100"} flex flex-col items-center text-center`}
                 >
                   <div className="absolute top-4 right-4">
                     <input
-                      checked={selectedModules.includes(module.id)}
+                      checked={selectedModules.includes(module.numericId)}
                       onChange={() => { }}
                       className="custom-checkbox"
                       type="checkbox"
                     />
                   </div>
-                  <div className="size-16 rounded-2xl bg-blue-50 flex items-center justify-center text-[var(--primary)] mb-6">
+                  <div className="size-16 rounded-2xl bg-blue-50 flex items-center justify-center text-[var(--primary)] mb-6" style={{ backgroundColor: `${module.color}15`, color: module.color }}>
                     <span className="material-symbols-outlined text-4xl">
                       {module.icon}
                     </span>
                   </div>
                   <h3 className="text-lg font-bold text-slate-900 mb-2">
-                    {module.title}
+                    {module.label}
                   </h3>
                   <p className="text-sm text-[var(--text-muted)] font-inter">
-                    {module.desc}
+                    {module.description}
                   </p>
                 </div>
               ))}

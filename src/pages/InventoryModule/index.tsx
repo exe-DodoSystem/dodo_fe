@@ -1,7 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import "./inventory.css";
-
 interface InventoryItem {
     sku: string;
     name: string;
@@ -17,7 +15,6 @@ const inventoryItems: InventoryItem[] = [
 ];
 
 export default function InventoryModule() {
-    const navigate = useNavigate();
     const [currentPage, setCurrentPage] = useState(1);
 
     return (
