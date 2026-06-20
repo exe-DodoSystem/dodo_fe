@@ -4,6 +4,8 @@ import { DatePicker, Spin, Alert } from 'antd';
 import dayjs, { type Dayjs } from 'dayjs';
 import { getAdminDashboard } from '../../api/dashboard';
 import type { AdminDashboardData, DashboardAlert, DeptCount } from '../../types/dashboard';
+import { useRealtimeEvent } from '../../contexts/RealtimeContext';
+import { RT_EVENTS } from '../../api/realtime';
 
 const VND = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' });
 
@@ -105,6 +107,7 @@ export default function AdminDashboard({ userName, tenantName }: { userName: str
   const [data, setData] = useState<AdminDashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -116,7 +119,10 @@ export default function AdminDashboard({ userName, tenantName }: { userName: str
       .catch(() => { if (!cancelled) setError('Không thể tải dữ liệu dashboard.'); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [selectedMonth]);
+  }, [selectedMonth, refreshKey]);
+
+  // Realtime: BE yêu cầu refresh dashboard (sau khi xử lý appeal / cập nhật chấm công)
+  useRealtimeEvent(RT_EVENTS.DASHBOARD_REFRESH, () => setRefreshKey((k) => k + 1));
 
   const greeting = (() => {
     const h = new Date().getHours();

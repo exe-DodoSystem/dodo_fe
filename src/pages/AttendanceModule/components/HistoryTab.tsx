@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getMyHistory } from '../../../api/attendance';
 import type { HistoryDay } from '../../../api/attendance';
+import { useRealtimeEvent } from '../../../contexts/RealtimeContext';
+import { RT_EVENTS } from '../../../api/realtime';
 
 const STATUS_CONFIG: Record<string, { label: string; cls: string }> = {
   Normal: { label: 'Đúng giờ', cls: 'att-hist-normal' },
@@ -69,6 +71,10 @@ export default function HistoryTab() {
   useEffect(() => {
     fetchHistory(month, year);
   }, [month, year, fetchHistory]);
+
+  // Realtime: đơn giải trình được duyệt hoặc HR chấm tay → tải lại tháng đang xem
+  useRealtimeEvent(RT_EVENTS.APPEAL_PROCESSED, () => { fetchHistory(month, year); });
+  useRealtimeEvent(RT_EVENTS.ATTENDANCE_MANUAL_ADJUSTED, () => { fetchHistory(month, year); });
 
   const goPrevMonth = () => {
     if (month === 1) { setMonth(12); setYear(y => y - 1); }

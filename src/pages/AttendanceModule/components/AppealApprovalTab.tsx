@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { getPendingAppeals, processAppeal } from '../../../api/attendance';
 import { getEmployees } from '../../../api/hr';
 import type { Appeal, AppealType } from '../../../api/attendance';
+import { useRealtimeEvent } from '../../../contexts/RealtimeContext';
+import { RT_EVENTS } from '../../../api/realtime';
 
 const APPEAL_TYPE_LABEL: Record<AppealType, string> = {
   In: 'Check-in',
@@ -64,6 +66,13 @@ export default function AppealApprovalTab() {
   }, []);
 
   useEffect(() => { loadData(); }, [loadData]);
+
+  // Realtime: có đơn giải trình mới → tự nạp lại + báo
+  useRealtimeEvent(RT_EVENTS.APPEAL_SUBMITTED, (payload) => {
+    const name = (payload as { employeeName?: string } | null)?.employeeName;
+    showToast(name ? `Có đơn giải trình mới từ ${name}.` : 'Có đơn giải trình mới.');
+    loadData();
+  });
 
   const handleApprove = async (appealId: string) => {
     setApprovingId(appealId);

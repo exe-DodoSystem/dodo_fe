@@ -1,6 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { getTodayStatus, submitPunch } from '../../../api/attendance';
 import type { TodayStatus } from '../../../api/attendance';
+import { useRealtimeEvent } from '../../../contexts/RealtimeContext';
+import { RT_EVENTS } from '../../../api/realtime';
 
 const STATUS_CONFIG: Record<string, { label: string; cls: string }> = {
   Normal: { label: 'Đúng giờ', cls: 'att-badge-normal' },
@@ -55,8 +57,12 @@ export default function TodayTab() {
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
-  const fetchStatus = useCallback(async () => {
-    setLoading(true);
+  // Selfie (tùy chọn)
+  const [selfieBase64, setSelfieBase64] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const fetchStatus = useCallback(async (showSpinner = true) => {
+    if (showSpinner) setLoading(true);
     setError('');
     try {
       const data = await getTodayStatus();
@@ -64,13 +70,33 @@ export default function TodayTab() {
     } catch {
       setError('Không thể tải trạng thái chấm công. Vui lòng thử lại.');
     } finally {
-      setLoading(false);
+      if (showSpinner) setLoading(false);
     }
   }, []);
 
   useEffect(() => {
     fetchStatus();
   }, [fetchStatus]);
+
+  // Realtime: tự cập nhật khi background job tính xong, hoặc HR chấm tay cho mình
+  useRealtimeEvent(RT_EVENTS.ATTENDANCE_UPDATED, () => { fetchStatus(false); });
+  useRealtimeEvent(RT_EVENTS.ATTENDANCE_MANUAL_ADJUSTED, () => {
+    setSuccessMsg('HR vừa bổ sung chấm công cho bạn.');
+    fetchStatus(false);
+  });
+
+  const handleSelfieChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => setSelfieBase64(typeof reader.result === 'string' ? reader.result : null);
+    reader.readAsDataURL(file);
+  };
+
+  const clearSelfie = () => {
+    setSelfieBase64(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
 
   const handlePunch = async () => {
     setSubmitting(true);
@@ -96,9 +122,11 @@ export default function TodayTab() {
         punchType: 'Auto',
         isMockLocation: false,
         selfieUrl: null,
+        selfieBase64,
       });
       setSuccessMsg('Đã ghi nhận chấm công, đang chờ xử lý...');
-      await fetchStatus();
+      clearSelfie();
+      await fetchStatus(false);
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { error?: string } } };
       const serverError = axiosErr?.response?.data?.error ?? '';
@@ -128,6 +156,36 @@ export default function TodayTab() {
 
   const statusCfg = status?.status ? STATUS_CONFIG[status.status] : null;
   const isProcessing = status?.hasCheckedIn && !status?.status;
+
+  const selfieBlock = (
+    <div className="att-selfie-block">
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        capture="user"
+        onChange={handleSelfieChange}
+        style={{ display: 'none' }}
+      />
+      {selfieBase64 ? (
+        <div className="att-selfie-preview">
+          <img src={selfieBase64} alt="Ảnh selfie chấm công" />
+          <button type="button" className="att-selfie-clear" onClick={clearSelfie} title="Xóa ảnh">
+            <span className="material-symbols-outlined">close</span>
+          </button>
+        </div>
+      ) : (
+        <button
+          type="button"
+          className="att-selfie-btn"
+          onClick={() => fileInputRef.current?.click()}
+        >
+          <span className="material-symbols-outlined">photo_camera</span>
+          Chụp ảnh (tùy chọn)
+        </button>
+      )}
+    </div>
+  );
 
   return (
     <div className="att-today-wrapper">
@@ -162,6 +220,7 @@ export default function TodayTab() {
             </div>
             <p className="att-punch-heading">Bạn chưa check-in hôm nay</p>
             <p className="att-punch-sub">Nhấn nút bên dưới để ghi nhận giờ vào làm</p>
+            {selfieBlock}
             <button className="att-punch-btn att-punch-checkin" onClick={handlePunch} disabled={submitting}>
               {submitting
                 ? <><span className="material-symbols-outlined animate-spin">refresh</span>Đang xử lý...</>
@@ -186,6 +245,7 @@ export default function TodayTab() {
                 {statusCfg.label}{status.lateMinutes > 0 && ` • Trễ ${status.lateMinutes} phút`}
               </span>
             )}
+            {selfieBlock}
             <button className="att-punch-btn att-punch-checkout" onClick={handlePunch} disabled={submitting}>
               {submitting
                 ? <><span className="material-symbols-outlined animate-spin">refresh</span>Đang xử lý...</>

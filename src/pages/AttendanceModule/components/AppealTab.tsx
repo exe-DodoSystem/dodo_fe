@@ -3,6 +3,8 @@ import { TimePicker, DatePicker } from 'antd';
 import dayjs from 'dayjs';
 import { submitAppeal, getMyAppeals } from '../../../api/attendance';
 import type { Appeal, AppealType } from '../../../api/attendance';
+import { useRealtimeEvent } from '../../../contexts/RealtimeContext';
+import { RT_EVENTS } from '../../../api/realtime';
 
 const APPEAL_STATUS: Record<string, { label: string; cls: string }> = {
   PendingApproval: { label: 'Đang chờ duyệt', cls: 'att-appeal-pending' },
@@ -83,6 +85,17 @@ export default function AppealTab() {
   useEffect(() => {
     fetchAppeals();
   }, [fetchAppeals]);
+
+  // Realtime: HR vừa duyệt/từ chối đơn của mình → cập nhật danh sách
+  useRealtimeEvent(RT_EVENTS.APPEAL_PROCESSED, (payload) => {
+    const status = (payload as { status?: string } | null)?.status;
+    setSubmitSuccess(
+      status === 'Approved' ? 'Đơn giải trình của bạn đã được duyệt.'
+      : status === 'Rejected' ? 'Đơn giải trình của bạn đã bị từ chối.'
+      : 'Đơn giải trình của bạn vừa được xử lý.'
+    );
+    fetchAppeals();
+  });
 
   const validateForm = (): string => {
     if (!workDate) return 'Vui lòng chọn ngày cần giải trình.';
