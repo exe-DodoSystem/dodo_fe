@@ -37,6 +37,8 @@ export interface SubmitPunchRequest {
   punchType: 'Auto' | 'In' | 'Out';
   isMockLocation: boolean;
   selfieUrl: string | null;
+  /** Base64 data URI của ảnh selfie (tùy chọn) — BE tự upload Cloudinary */
+  selfieBase64?: string | null;
 }
 
 export interface SubmitPunchResponse {

@@ -4,6 +4,8 @@ import { DatePicker, Spin, Alert, Badge } from 'antd';
 import dayjs, { type Dayjs } from 'dayjs';
 import { getEmployeeDashboard } from '../../api/dashboard';
 import type { EmployeeDashboardData, MyTodayStatus, MyCurrentShift, MyLatestPayroll } from '../../types/dashboard';
+import { useRealtimeEvent } from '../../contexts/RealtimeContext';
+import { RT_EVENTS } from '../../api/realtime';
 
 const VND = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' });
 
@@ -186,6 +188,7 @@ export default function EmployeeDashboard({ userName, tenantName }: { userName: 
   const [data, setData] = useState<EmployeeDashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -197,7 +200,11 @@ export default function EmployeeDashboard({ userName, tenantName }: { userName: 
       .catch(() => { if (!cancelled) setError('Không thể tải dữ liệu dashboard.'); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [selectedMonth]);
+  }, [selectedMonth, refreshKey]);
+
+  // Realtime: chấm công cập nhật / BE yêu cầu refresh dashboard
+  useRealtimeEvent(RT_EVENTS.ATTENDANCE_UPDATED, () => setRefreshKey((k) => k + 1));
+  useRealtimeEvent(RT_EVENTS.DASHBOARD_REFRESH, () => setRefreshKey((k) => k + 1));
 
   const greeting = (() => {
     const h = new Date().getHours();

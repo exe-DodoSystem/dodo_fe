@@ -1,15 +1,8 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { registerApi } from '../../api/auth';
+import { ALL_MODULES } from '../../types/auth';
 import './register.css';
-
-const MODULES = [
-  { id: 1, title: 'Nhân sự (HR)', desc: 'Quản lý nhân sự cơ bản', icon: 'badge', color: '#1d6ced', price: 150000 },
-  { id: 2, title: 'Chấm công', desc: 'Chấm công & Tính lương', icon: 'calendar_month', color: '#10b981', price: 180000 },
-  { id: 3, title: 'Sales & CRM', desc: 'Quản lý khách hàng & Đơn hàng', icon: 'groups', color: '#6366f1', price: 180000 },
-  { id: 4, title: 'Quản lý công việc', desc: 'Quản lý công việc & Dự án', icon: 'assignment', color: '#06b6d4', price: 150000 },
-  { id: 5, title: 'Dashboard & Báo cáo', desc: 'Dashboard & Báo cáo tổng quan', icon: 'monitoring', color: '#f97316', price: 120000 },
-];
 
 const isValidEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
 const isValidPhone = (v: string) => /^[0-9]{10}$/.test(v.replace(/\s/g, ''));
@@ -332,14 +325,14 @@ export default function RegisterPage() {
             </div>
 
             <div className="reg-modules-grid">
-              {MODULES.map((mod) => {
-                const active = selectedModules.includes(mod.id);
+              {ALL_MODULES.map((mod) => {
+                const active = selectedModules.includes(mod.numericId);
                 return (
                   <button
-                    key={mod.id}
+                    key={mod.numericId}
                     type="button"
                     className={`reg-mod-card ${active ? 'active' : ''}`}
-                    onClick={() => toggleModule(mod.id)}
+                    onClick={() => toggleModule(mod.numericId)}
                     style={active ? { borderColor: mod.color, boxShadow: `0 0 0 3px ${mod.color}22` } : {}}
                   >
                     <span
@@ -349,9 +342,9 @@ export default function RegisterPage() {
                       {mod.icon}
                     </span>
                     <div className="reg-mod-info">
-                      <span className="reg-mod-name">{mod.title}</span>
+                      <span className="reg-mod-name">{mod.label}</span>
                       <span className="reg-mod-price">
-                        {mod.price.toLocaleString('vi-VN')} ₫/tháng
+                        {mod.monthlyPrice.toLocaleString('vi-VN')} ₫/tháng
                       </span>
                     </div>
                     {active && (
@@ -368,13 +361,13 @@ export default function RegisterPage() {
             <div className="reg-modules-summary">
               <span className="material-symbols-outlined">inventory_2</span>
               <span>
-                Đã chọn <strong>{selectedModules.length}</strong> / {MODULES.length} modules
+                Đã chọn <strong>{selectedModules.length}</strong> / {ALL_MODULES.length} modules
               </span>
               {selectedModules.length > 0 && (
                 <span className="reg-modules-total">
-                  ~{MODULES
-                    .filter(m => selectedModules.includes(m.id))
-                    .reduce((sum, m) => sum + m.price, 0)
+                  ~{ALL_MODULES
+                    .filter(m => selectedModules.includes(m.numericId))
+                    .reduce((sum, m) => sum + m.monthlyPrice, 0)
                     .toLocaleString('vi-VN')} ₫/tháng
                 </span>
               )}

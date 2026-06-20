@@ -4,6 +4,8 @@ import { DatePicker, Spin, Alert } from 'antd';
 import dayjs, { type Dayjs } from 'dayjs';
 import { getManagerDashboard } from '../../api/dashboard';
 import type { ManagerDashboardData, DashboardAlert, DeptCount } from '../../types/dashboard';
+import { useRealtimeEvent } from '../../contexts/RealtimeContext';
+import { RT_EVENTS } from '../../api/realtime';
 
 function AlertPanel({ alerts }: { alerts: DashboardAlert[] }) {
   const navigate = useNavigate();
@@ -97,6 +99,7 @@ export default function ManagerDashboard({ userName, tenantName }: { userName: s
   const [data, setData] = useState<ManagerDashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -108,7 +111,10 @@ export default function ManagerDashboard({ userName, tenantName }: { userName: s
       .catch(() => { if (!cancelled) setError('Không thể tải dữ liệu dashboard.'); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [selectedMonth]);
+  }, [selectedMonth, refreshKey]);
+
+  // Realtime: BE yêu cầu refresh dashboard
+  useRealtimeEvent(RT_EVENTS.DASHBOARD_REFRESH, () => setRefreshKey((k) => k + 1));
 
   const greeting = (() => {
     const h = new Date().getHours();

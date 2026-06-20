@@ -1,4 +1,4 @@
-export type Role = 'TenantAdmin' | 'Manager' | 'HRManager' | 'Employee';
+export type Role = 'TenantAdmin' | 'Manager' | 'HRManager' | 'Employee' | 'SystemAdmin';
 
 export type ModuleId =
   | 'hr'
@@ -15,6 +15,7 @@ export interface User {
   avatarColor: string;
   phone?: string;
   isActive?: boolean;
+  avatarUrl?: string | null;
 }
 
 export interface Tenant {
@@ -90,4 +91,5 @@ export const ROLE_MODULE_ACCESS: Record<Role, ModuleId[]> = {
   Manager:     ['hr', 'attendance', 'payroll', 'dashboard'],
   HRManager:   ['hr', 'attendance', 'payroll', 'dashboard'],
   Employee:    ['attendance', 'payroll', 'dashboard'],
+  SystemAdmin: [],  // SystemAdmin dùng /system/* — không có module tenant
 };

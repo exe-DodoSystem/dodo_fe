@@ -1,80 +1,6 @@
 import { useNavigate } from "react-router-dom";
+import { ALL_MODULES } from "../../types/auth";
 import "./products.css";
-
-const modules = [
-    {
-        id: "hr",
-        title: "Quản lý Nhân sự (HR)",
-        desc: "Số hóa hồ sơ nhân sự, quản lý hợp đồng, bảo hiểm và quy trình tuyển dụng chuyên nghiệp.",
-        icon: "badge",
-        color: "blue",
-        bgClass: "bg-blue-50",
-        textClass: "text-blue-600",
-    },
-    {
-        id: "attendance",
-        title: "Chấm công (Attendance)",
-        desc: "Chấm công đa hình thức qua GPS, Wifi hoặc khuôn mặt. Theo dõi lịch sử công minh bạch.",
-        icon: "calendar_month",
-        color: "emerald",
-        bgClass: "bg-emerald-50",
-        textClass: "text-emerald-600",
-    },
-    {
-        id: "crm",
-        title: "Quản lý Khách hàng (CRM)",
-        desc: "Tối ưu hóa phễu bán hàng, chăm sóc khách hàng 360 độ và theo dõi chi tiêu tích lũy.",
-        icon: "groups",
-        color: "indigo",
-        bgClass: "bg-indigo-50",
-        textClass: "text-indigo-600",
-    },
-    {
-        id: "orders",
-        title: "Quản lý Đơn hàng",
-        desc: "Theo dõi lộ trình đơn hàng từ lúc đặt đến khi hoàn tất, cập nhật trạng thái thời gian thực.",
-        icon: "shopping_cart",
-        color: "amber",
-        bgClass: "bg-amber-50",
-        textClass: "text-amber-600",
-    },
-    {
-        id: "inventory",
-        title: "Quản lý Kho hàng",
-        desc: "Kiểm soát tồn kho thời gian thực, nhập kho theo SKU, cảnh báo xuất nhập kho thông minh.",
-        icon: "inventory_2",
-        color: "rose",
-        bgClass: "bg-rose-50",
-        textClass: "text-rose-600",
-    },
-    {
-        id: "payroll",
-        title: "Tính lương (Payroll)",
-        desc: "Tự động hóa bảng lương, thuế và các khoản bảo hiểm. Tính lương chính xác theo chấm công.",
-        icon: "payments",
-        color: "violet",
-        bgClass: "bg-violet-50",
-        textClass: "text-violet-600",
-    },
-    {
-        id: "projects",
-        title: "Công việc & Dự án",
-        desc: "Giao việc, theo dõi tiến độ và báo cáo hiệu suất tức thì. Quản lý dự án trực quan.",
-        icon: "assignment",
-        color: "cyan",
-        bgClass: "bg-cyan-50",
-        textClass: "text-cyan-600",
-    },
-    {
-        id: "analytics",
-        title: "Báo cáo & Phân tích",
-        desc: "Hệ thống Dashboard trực quan hỗ trợ ra quyết định nhanh với dữ liệu thời gian thực.",
-        icon: "monitoring",
-        color: "orange",
-        bgClass: "bg-orange-50",
-        textClass: "text-orange-600",
-    },
-];
 
 export default function ProductsPage() {
     const navigate = useNavigate();
@@ -159,24 +85,25 @@ export default function ProductsPage() {
 
                     {/* Module Grid */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {modules.map((module) => (
+                        {ALL_MODULES.map((module) => (
                             <div
                                 key={module.id}
                                 onClick={() => navigate(`/modules/${module.id}`)}
-                                className="module-card bg-white p-8 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center text-center"
+                                className="module-card bg-white p-8 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center text-center cursor-pointer"
                             >
                                 <div
-                                    className={`module-icon size-16 rounded-2xl ${module.bgClass} ${module.textClass} flex items-center justify-center mb-6`}
+                                    className={`module-icon size-16 rounded-2xl flex items-center justify-center mb-6`}
+                                    style={{ backgroundColor: `${module.color}15`, color: module.color }}
                                 >
                                     <span className="material-symbols-outlined text-4xl">
                                         {module.icon}
                                     </span>
                                 </div>
                                 <h3 className="text-lg font-bold text-slate-900 mb-3">
-                                    {module.title}
+                                    {module.label}
                                 </h3>
                                 <p className="text-sm text-[var(--text-muted)] font-inter leading-relaxed mb-4 flex-1">
-                                    {module.desc}
+                                    {module.description}
                                 </p>
                                 <div className="flex items-center gap-1.5 text-[var(--primary)] font-semibold text-sm">
                                     <span>Khám phá</span>
