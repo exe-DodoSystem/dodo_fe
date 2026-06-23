@@ -12,6 +12,10 @@ import {
   updateManualFields,
 } from '../../../api/payroll';
 import type { Payroll, PagedPayrollResponse } from '../../../api/payroll';
+import { useRealtimeEvent } from '../../../contexts/RealtimeContext';
+import { RT_EVENTS } from '../../../api/realtime';
+import StructuredEntriesModal from './StructuredEntriesModal';
+import BulkBonusModal from './BulkBonusModal';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -97,7 +101,10 @@ function ManualFieldsModal({
 
   const bonusNum = bonus === '' ? 0 : Math.max(0, Number(bonus) || 0);
   const deductionNum = deduction === '' ? 0 : Math.max(0, Number(deduction) || 0);
-  const previewNet = payroll.basePay + payroll.otPay - payroll.penaltyFee + bonusNum - deductionNum;
+  const previewNet =
+    payroll.basePay + payroll.otPay - payroll.penaltyFee
+    + payroll.structuredBonus + bonusNum
+    - payroll.structuredDeduction - deductionNum;
 
   const handleSave = async () => {
     setErr('');
@@ -180,6 +187,8 @@ function ManualFieldsModal({
               {vnd(payroll.basePay)}
               {' + '}{vnd(payroll.otPay)}
               {' − '}{vnd(payroll.penaltyFee)}
+              {payroll.structuredBonus > 0 && <span className="pay-preview-plus"> + {vnd(payroll.structuredBonus)}</span>}
+              {payroll.structuredDeduction > 0 && <span className="pay-preview-minus"> − {vnd(payroll.structuredDeduction)}</span>}
               {bonusNum > 0 && <span className="pay-preview-plus"> + {vnd(bonusNum)}</span>}
               {deductionNum > 0 && <span className="pay-preview-minus"> − {vnd(deductionNum)}</span>}
               {' = '}
@@ -241,6 +250,8 @@ export default function HRPayrollTab() {
   // ── UI State ──
   const [confirm,       setConfirm]       = useState<ConfirmConfig | null>(null);
   const [manualPayroll, setManualPayroll] = useState<Payroll | null>(null);
+  const [entriesPayroll, setEntriesPayroll] = useState<Payroll | null>(null);
+  const [bulkOpen, setBulkOpen] = useState(false);
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
 
   const showToast = (msg: string, type: 'success' | 'error' = 'success') => {
@@ -271,6 +282,12 @@ export default function HRPayrollTab() {
   }, [filterMonth, filterYear, filterDeptId, filterStatus, page, pageSize, sortBy, sortDir]);
 
   useEffect(() => { loadPayrolls(); }, [loadPayrolls]);
+
+  // Realtime: phiếu lương thay đổi (chốt/thanh toán/sinh/điều chỉnh) → làm tươi bảng
+  useRealtimeEvent(RT_EVENTS.PAYROLL_PUBLISHED, loadPayrolls);
+  useRealtimeEvent(RT_EVENTS.PAYROLL_PAID, loadPayrolls);
+  useRealtimeEvent(RT_EVENTS.PAYROLL_GENERATED, loadPayrolls);
+  useRealtimeEvent(RT_EVENTS.BONUS_DEDUCTION_ENTRY_ADDED, loadPayrolls);
 
   const handleSort = (col: string) => {
     if (sortBy === col) setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
@@ -392,6 +409,18 @@ export default function HRPayrollTab() {
           </p>
         </div>
         <div className="hr-pay-toolbar-actions">
+          {(isAdmin || isHR) && (
+            <button
+              className="pay-btn-secondary"
+              onClick={() => {
+                if (filterMonth === '') { showToast('Chọn tháng cụ thể trước khi áp dụng hàng loạt.', 'error'); return; }
+                setBulkOpen(true);
+              }}
+            >
+              <span className="material-symbols-outlined">redeem</span>
+              Thưởng/phạt hàng loạt
+            </button>
+          )}
           {isAdmin && (
             <button className="pay-btn-secondary" onClick={handlePublishAll}>
               <span className="material-symbols-outlined">done_all</span>
@@ -517,7 +546,10 @@ export default function HRPayrollTab() {
                       {p.penaltyFee > 0 ? `−${vnd(p.penaltyFee)}` : '—'}
                     </td>
                     <td className="hr-pay-right hr-pay-plus">
-                      {p.customBonus ? `+${vnd(p.customBonus)}` : '—'}
+                      {(() => {
+                        const totalBonus = p.structuredBonus + (p.customBonus ?? 0);
+                        return totalBonus > 0 ? `+${vnd(totalBonus)}` : '—';
+                      })()}
                     </td>
                     <td className="hr-pay-right hr-pay-net">
                       {vnd(p.netSalary)}
@@ -538,6 +570,13 @@ export default function HRPayrollTab() {
                               onClick={() => setManualPayroll(p)}
                             >
                               <span className="material-symbols-outlined">edit</span>
+                            </button>
+                            <button
+                              className="hr-pay-act-btn hr-pay-act-entries"
+                              title="Thưởng / phạt có cấu trúc"
+                              onClick={() => setEntriesPayroll(p)}
+                            >
+                              <span className="material-symbols-outlined">savings</span>
                             </button>
                             {(isAdmin || isHR) && (
                               <button
@@ -623,6 +662,29 @@ export default function HRPayrollTab() {
             updateRow(updated);
             setManualPayroll(null);
             showToast('Đã lưu thành công.');
+          }}
+        />
+      )}
+
+      {/* Structured Entries Modal */}
+      {entriesPayroll && (
+        <StructuredEntriesModal
+          payroll={entriesPayroll}
+          onClose={() => setEntriesPayroll(null)}
+          onChanged={loadPayrolls}
+        />
+      )}
+
+      {/* Bulk Bonus/Penalty Modal */}
+      {bulkOpen && filterMonth !== '' && (
+        <BulkBonusModal
+          month={filterMonth as number}
+          year={filterYear}
+          onClose={() => setBulkOpen(false)}
+          onDone={(msg) => {
+            setBulkOpen(false);
+            showToast(msg);
+            loadPayrolls();
           }}
         />
       )}

@@ -15,6 +15,14 @@ export const RT_EVENTS = {
   APPEAL_PROCESSED: 'appeal.processed',
   APPEAL_SUBMITTED: 'appeal.submitted',
   DASHBOARD_REFRESH: 'dashboard.refresh',
+  // HR
+  SHIFT_ASSIGNED: 'shift.assigned',
+  EMPLOYEE_ONBOARDED: 'employee.onboarded',
+  // Payroll
+  PAYROLL_PUBLISHED: 'payroll.published',
+  PAYROLL_PAID: 'payroll.paid',
+  PAYROLL_GENERATED: 'payroll.generated',
+  BONUS_DEDUCTION_ENTRY_ADDED: 'bonus_deduction.entry_added',
 } as const;
 
 export type RealtimeEvent = (typeof RT_EVENTS)[keyof typeof RT_EVENTS];

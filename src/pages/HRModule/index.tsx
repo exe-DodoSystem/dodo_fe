@@ -8,6 +8,8 @@ import WorkScheduleTab from './components/WorkScheduleTab';
 import { getEmployees } from '../../api/hr';
 import type { Employee } from '../../api/hr';
 import { useAuth } from '../../contexts/AuthContext';
+import { useRealtimeEvent } from '../../contexts/RealtimeContext';
+import { RT_EVENTS } from '../../api/realtime';
 
 
 const PAGE_SIZE = 10;
@@ -70,6 +72,11 @@ export default function HRModule() {
       fetchEmployees(currentPage, searchTerm);
     }
   }, [activeTab, currentPage, searchTerm, fetchEmployees]);
+
+  // Realtime: nhân viên mới hoàn tất onboarding → làm tươi danh sách
+  useRealtimeEvent(RT_EVENTS.EMPLOYEE_ONBOARDED, () => {
+    if (activeTab === 'employees') fetchEmployees(currentPage, searchTerm);
+  });
 
   // Search submit
   const handleSearch = (e: React.FormEvent) => {

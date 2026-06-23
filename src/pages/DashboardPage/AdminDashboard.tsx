@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DatePicker, Spin, Alert } from 'antd';
 import dayjs, { type Dayjs } from 'dayjs';
 import { getAdminDashboard } from '../../api/dashboard';
 import type { AdminDashboardData, DashboardAlert, DeptCount } from '../../types/dashboard';
 import { useRealtimeEvent } from '../../contexts/RealtimeContext';
+import { useAutoRefresh } from '../../hooks/useAutoRefresh';
 import { RT_EVENTS } from '../../api/realtime';
 
 const VND = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' });
@@ -107,22 +108,25 @@ export default function AdminDashboard({ userName, tenantName }: { userName: str
   const [data, setData] = useState<AdminDashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [refreshKey, setRefreshKey] = useState(0);
   const navigate = useNavigate();
+  const reqIdRef = useRef(0);
 
-  useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
+  const fetchData = useCallback((silent = false) => {
+    const id = ++reqIdRef.current;
+    if (!silent) setLoading(true);
     setError(null);
-    getAdminDashboard(selectedMonth.month() + 1, selectedMonth.year())
-      .then((d) => { if (!cancelled) setData(d); })
-      .catch(() => { if (!cancelled) setError('Không thể tải dữ liệu dashboard.'); })
-      .finally(() => { if (!cancelled) setLoading(false); });
-    return () => { cancelled = true; };
-  }, [selectedMonth, refreshKey]);
+    return getAdminDashboard(selectedMonth.month() + 1, selectedMonth.year())
+      .then((d) => { if (id === reqIdRef.current) setData(d); })
+      .catch(() => { if (id === reqIdRef.current) setError('Không thể tải dữ liệu dashboard.'); })
+      .finally(() => { if (!silent && id === reqIdRef.current) setLoading(false); });
+  }, [selectedMonth]);
 
-  // Realtime: BE yêu cầu refresh dashboard (sau khi xử lý appeal / cập nhật chấm công)
-  useRealtimeEvent(RT_EVENTS.DASHBOARD_REFRESH, () => setRefreshKey((k) => k + 1));
+  useEffect(() => { fetchData(); }, [fetchData]);
+
+  // Realtime: BE yêu cầu refresh dashboard (appeal / payroll / onboarding...) — refetch im lặng
+  useRealtimeEvent(RT_EVENTS.DASHBOARD_REFRESH, () => fetchData(true));
+  // Fallback (SignalR best-effort): refetch khi tab visible trở lại / SignalR reconnect
+  useAutoRefresh(() => fetchData(true));
 
   const greeting = (() => {
     const h = new Date().getHours();

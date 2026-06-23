@@ -14,6 +14,9 @@ interface RealtimeContextType {
   subscribe: (event: RealtimeEvent, handler: Handler) => () => void;
 }
 
+/** Window CustomEvent phát khi SignalR kết nối lại — useAutoRefresh lắng nghe. */
+export const RECONNECTED_EVENT = 'realtime:reconnected';
+
 const RealtimeContext = createContext<RealtimeContextType | null>(null);
 
 export function RealtimeProvider({ children }: { children: ReactNode }) {
@@ -57,10 +60,15 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
       });
     }
 
+    // Khi kết nối lại sau khi rớt → phát window event để component refetch (data có thể đã cũ)
+    connection.onreconnected(() => {
+      window.dispatchEvent(new Event(RECONNECTED_EVENT));
+    });
+
     let cancelled = false;
     connection.start().catch((err) => {
       if (!cancelled) {
-        // Best-effort: không chặn app nếu hub không kết nối được (polling 60s là fallback)
+        // Best-effort: không chặn app nếu hub không kết nối được (vẫn có fallback focus/poll)
         console.warn('[realtime] connection failed', err);
       }
     });
