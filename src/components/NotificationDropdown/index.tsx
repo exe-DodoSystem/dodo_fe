@@ -226,7 +226,7 @@ export default function NotificationDropdown() {
       placement="bottomRight"
       arrow={false}
       rootClassName="notif-popover"          // antd v5+: rootClassName thay overlayClassName
-      styles={{ body: { padding: 0, borderRadius: 14, overflow: 'hidden' } }}
+      styles={{ content: { padding: 0, borderRadius: 14, overflow: 'hidden' } }}
     >
       <button className="app-topbar-icon-btn notif-bell-btn" title="Thông báo">
         <Badge
