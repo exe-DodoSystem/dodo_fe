@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Table, Tag, Modal, Descriptions, Spin } from 'antd';
+import { Table, Modal, Descriptions, Spin } from 'antd';
 import type { TableColumnsType } from 'antd';
 import { getTenants } from '../../../api/systemTenantApi';
 import type { SystemTenantDto } from '../../../types/systemTenant';
