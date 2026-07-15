@@ -99,11 +99,12 @@ export interface Payroll {
 // ─── Employee API ─────────────────────────────────────────────────────────────
 
 export async function getMyPayrolls(month?: number, year?: number): Promise<Payroll[]> {
-  const params = new URLSearchParams();
-  if (month !== undefined) params.set('month', String(month));
-  if (year !== undefined) params.set('year', String(year));
-  const query = params.toString() ? `?${params.toString()}` : '';
-  const res = await axiosClient.get<Payroll[]>(`/api/payrolls/my${query}`);
+  const res = await axiosClient.get<Payroll[]>('/api/payrolls/my', {
+    params: {
+      ...(month !== undefined ? { month } : {}),
+      ...(year !== undefined ? { year } : {}),
+    },
+  });
   return res.data;
 }
 

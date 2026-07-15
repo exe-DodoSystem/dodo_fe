@@ -1,6 +1,10 @@
 import axios from 'axios';
 
-export const API_URL = 'https://localhost:7214';
+const DEFAULT_API_URL = 'https://dodosystem-api.duckdns.org';
+
+// Production uses the hosted API by default. Developers can still point the
+// frontend at another backend by setting VITE_API_URL in a local env file.
+export const API_URL = (import.meta.env.VITE_API_URL || DEFAULT_API_URL).replace(/\/$/, '');
 
 const axiosClient = axios.create({
   baseURL: API_URL,
