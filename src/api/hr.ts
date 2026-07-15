@@ -3,11 +3,11 @@ import axiosClient from './axiosClient';
 export interface Employee {
   id: string;
   tenantId: string;
-  userId: string;
-  departmentId: string;
-  departmentName: string;
-  positionId: string;
-  positionName: string;
+  userId: string | null;
+  departmentId: string | null;
+  departmentName: string | null;
+  positionId: string | null;
+  positionName: string | null;
   fullName: string;
   phone: string;
   email: string;
@@ -67,18 +67,27 @@ export interface GetEmployeesParams {
   search?: string;
   roleId?: number;
   departmentId?: string;
+  includeResigned?: boolean;
 }
 
 export async function getEmployees(
   params: GetEmployeesParams = {}
 ): Promise<PaginatedResponse<Employee>> {
-  const { pageNumber = 1, pageSize = 10, search = '', roleId, departmentId } = params;
+  const {
+    pageNumber = 1,
+    pageSize = 10,
+    search = '',
+    roleId,
+    departmentId,
+    includeResigned = false,
+  } = params;
   const query = new URLSearchParams({
     pageNumber: String(pageNumber),
     pageSize: String(pageSize),
     ...(search ? { search } : {}),
     ...(roleId !== undefined ? { roleId: String(roleId) } : {}),
     ...(departmentId ? { departmentId } : {}),
+    ...(includeResigned ? { IncludeResigned: 'true' } : {}),
   });
   const response = await axiosClient.get<PaginatedResponse<Employee>>(
     `/api/hr/employees?${query}`
@@ -117,6 +126,11 @@ export async function updateEmployee(
 
 export async function deleteEmployee(id: string): Promise<void> {
   await axiosClient.delete(`/api/hr/employees/${id}`);
+}
+
+export async function restoreEmployee(id: string): Promise<Employee> {
+  const response = await axiosClient.patch<Employee>(`/api/hr/employees/${id}/restore`);
+  return response.data;
 }
 
 export async function getDepartments(): Promise<Department[]> {

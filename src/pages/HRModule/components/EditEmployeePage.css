@@ -417,12 +417,110 @@
     flex-shrink: 0;
 }
 
+.edit-resignation-panel {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: minmax(0, 1fr) minmax(220px, 0.8fr);
+    gap: 16px;
+    padding: 16px;
+    border: 1px solid #fed7aa;
+    border-radius: 12px;
+    background: #fffaf0;
+}
+
+.edit-resigned-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    color: #9a3412;
+    font-family: 'Inter', sans-serif;
+}
+
+.edit-resigned-notice > .material-symbols-outlined {
+    margin-top: 1px;
+    color: #ea580c;
+    font-size: 20px;
+}
+
+.edit-resigned-notice div {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.edit-resigned-notice strong {
+    font-size: 0.82rem;
+}
+
+.edit-resigned-notice span:last-child {
+    color: #c2410c;
+    font-size: 0.76rem;
+    line-height: 1.45;
+}
+
+.edit-input.has-error {
+    border-color: #e11d48;
+    background: #fff1f2;
+}
+
+.edit-input.has-error:focus {
+    border-color: #e11d48;
+    box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.1);
+}
+
+.edit-field-error {
+    color: #e11d48;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+@media (max-width: 700px) {
+    .edit-resignation-panel {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* ---------- Action row ---------- */
 .edit-actions-row {
     display: flex;
     justify-content: flex-end;
     gap: 12px;
     padding-top: 4px;
+}
+
+.edit-btn-delete {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-right: auto;
+    padding: 10px 18px;
+    border: 1.5px solid #fecdd3;
+    border-radius: 10px;
+    background: #fff;
+    color: #e11d48;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 700;
+    transition: all 0.15s ease;
+}
+
+.edit-btn-delete:hover {
+    border-color: #fb7185;
+    background: #fff1f2;
+}
+
+.edit-btn-delete .material-symbols-outlined {
+    font-size: 18px;
+}
+
+.edit-btn-delete:disabled,
+.edit-delete-confirm:disabled,
+.edit-btn-cancel:disabled,
+.edit-btn-save:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
 }
 
 .edit-btn-cancel {
@@ -468,6 +566,201 @@
 
 .edit-btn-save .material-symbols-outlined {
     font-size: 18px;
+}
+
+/* ---------- Delete confirmation dialog ---------- */
+.edit-delete-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(15, 23, 42, 0.58);
+    backdrop-filter: blur(4px);
+    animation: edit-delete-fade-in 0.16s ease-out;
+}
+
+.edit-delete-dialog {
+    width: min(100%, 520px);
+    overflow: hidden;
+    border: 1px solid #fecdd3;
+    border-radius: 20px;
+    background: #fff;
+    box-shadow: 0 24px 70px rgba(15, 23, 42, 0.28);
+    animation: edit-delete-scale-in 0.18s ease-out;
+}
+
+.edit-delete-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    margin: 28px auto 0;
+    border-radius: 50%;
+    background: #fff1f2;
+    color: #e11d48;
+}
+
+.edit-delete-icon .material-symbols-outlined {
+    font-size: 27px;
+}
+
+.edit-delete-content {
+    padding: 18px 28px 24px;
+    text-align: center;
+}
+
+.edit-delete-content h2 {
+    margin: 0 0 10px;
+    color: #1e293b;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 800;
+}
+
+.edit-delete-content > p {
+    margin: 0;
+    color: #64748b;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.86rem;
+    line-height: 1.65;
+}
+
+.edit-delete-employee {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 18px;
+    padding: 12px 14px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    background: #f8fafc;
+    text-align: left;
+}
+
+.edit-delete-employee > .material-symbols-outlined {
+    color: #94a3b8;
+    font-size: 22px;
+}
+
+.edit-delete-employee div {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.edit-delete-employee strong,
+.edit-delete-employee span:last-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.edit-delete-employee strong {
+    color: #334155;
+    font-size: 0.82rem;
+}
+
+.edit-delete-employee span:last-child {
+    color: #94a3b8;
+    font-size: 0.74rem;
+}
+
+.edit-delete-error {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-top: 14px;
+    padding: 10px 12px;
+    border: 1px solid #fecaca;
+    border-radius: 10px;
+    background: #fef2f2;
+    color: #dc2626;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.78rem;
+    line-height: 1.45;
+    text-align: left;
+}
+
+.edit-delete-error .material-symbols-outlined {
+    flex-shrink: 0;
+    font-size: 18px;
+}
+
+.edit-delete-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 16px 24px;
+    border-top: 1px solid #f1f5f9;
+    background: #fafbfc;
+}
+
+.edit-delete-confirm {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-width: 142px;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 10px;
+    background: #e11d48;
+    color: #fff;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 700;
+    transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.edit-delete-confirm:hover:not(:disabled) {
+    background: #be123c;
+    box-shadow: 0 4px 14px rgba(225, 29, 72, 0.25);
+}
+
+.edit-delete-confirm .material-symbols-outlined {
+    font-size: 18px;
+}
+
+@keyframes edit-delete-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes edit-delete-scale-in {
+    from { opacity: 0; transform: translateY(6px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (max-width: 560px) {
+    .edit-actions-row {
+        flex-wrap: wrap;
+    }
+
+    .edit-btn-delete {
+        width: 100%;
+        justify-content: center;
+        margin-right: 0;
+    }
+
+    .edit-delete-content {
+        padding-right: 20px;
+        padding-left: 20px;
+    }
+
+    .edit-delete-actions {
+        flex-direction: column-reverse;
+    }
+
+    .edit-delete-actions button {
+        width: 100%;
+        justify-content: center;
+    }
 }
 
 /* ---------- Not found state ---------- */
