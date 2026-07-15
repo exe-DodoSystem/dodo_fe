@@ -1,11 +1,9 @@
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
 import type { ReactNode } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 
-/**
- * Guard cho /app/* — yêu cầu tenant user đã đăng nhập và còn hạn dịch vụ.
- */
-export default function AppRoute({ children }: { children: ReactNode }) {
+/** Guard cho /renew — chỉ dành cho tenant user đã đăng nhập và hết hạn dịch vụ. */
+export default function RenewRoute({ children }: { children: ReactNode }) {
   const { user, isAuthenticated, isExpired } = useAuth();
   const location = useLocation();
 
@@ -17,8 +15,8 @@ export default function AppRoute({ children }: { children: ReactNode }) {
     return <Navigate to="/system/dashboard" replace />;
   }
 
-  if (isExpired) {
-    return <Navigate to="/renew" replace />;
+  if (!isExpired) {
+    return <Navigate to="/app/dashboard" replace />;
   }
 
   return <>{children}</>;

@@ -83,6 +83,26 @@
     background-color: #f8fafc;
 }
 
+.hr-table tbody .hr-row-resigned {
+    background-color: #f8fafc;
+}
+
+.hr-table tbody .hr-row-resigned:hover {
+    background-color: #f1f5f9;
+}
+
+.hr-row-resigned td {
+    opacity: 0.68;
+}
+
+.hr-row-resigned .hr-avatar {
+    filter: grayscale(1);
+}
+
+.hr-row-resigned .hr-status-badge {
+    opacity: 1;
+}
+
 /* Avatar */
 .hr-avatar {
     width: 36px;
@@ -201,6 +221,259 @@
 .hr-search:focus {
     border-color: var(--primary);
     box-shadow: 0 0 0 3px rgba(29, 108, 237, 0.1);
+}
+
+/* Employee filters */
+.hr-restore-banner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    margin: -8px 0 16px;
+    border: 1px solid #fed7aa;
+    border-radius: 14px;
+    background: #fffaf0;
+    box-shadow: 0 2px 8px rgba(154, 52, 18, 0.05);
+}
+
+.hr-restore-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+    border-radius: 10px;
+    background: #ffedd5;
+    color: #ea580c;
+}
+
+.hr-restore-icon .material-symbols-outlined {
+    font-size: 21px;
+}
+
+.hr-restore-copy {
+    display: flex;
+    min-width: 0;
+    flex: 1;
+    flex-direction: column;
+    gap: 2px;
+    font-family: 'Inter', sans-serif;
+}
+
+.hr-restore-copy strong {
+    color: #9a3412;
+    font-size: 0.84rem;
+}
+
+.hr-restore-copy > span {
+    overflow: hidden;
+    color: #c2410c;
+    font-size: 0.76rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.hr-restore-copy .hr-restore-error {
+    margin-top: 3px;
+    color: #dc2626;
+    font-weight: 600;
+    white-space: normal;
+}
+
+.hr-restore-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.hr-restore-dismiss,
+.hr-restore-button {
+    border-radius: 9px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 700;
+    transition: all 0.15s ease;
+}
+
+.hr-restore-dismiss {
+    padding: 8px 11px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: #9a3412;
+}
+
+.hr-restore-dismiss:hover {
+    background: #ffedd5;
+}
+
+.hr-restore-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border: 1px solid #fb923c;
+    background: #ea580c;
+    color: #fff;
+}
+
+.hr-restore-button:hover:not(:disabled) {
+    border-color: #c2410c;
+    background: #c2410c;
+}
+
+.hr-restore-button .material-symbols-outlined {
+    font-size: 17px !important;
+}
+
+.hr-restore-dismiss:disabled,
+.hr-restore-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.hr-restore-success {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 11px 14px;
+    margin: -8px 0 16px;
+    border: 1px solid #bbf7d0;
+    border-radius: 12px;
+    background: #f0fdf4;
+    color: #15803d;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.hr-restore-success > .material-symbols-outlined {
+    flex-shrink: 0;
+    font-size: 19px;
+}
+
+.hr-restore-success > span:nth-child(2) {
+    flex: 1;
+}
+
+.hr-restore-success button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    color: #16a34a;
+    cursor: pointer;
+}
+
+.hr-restore-success button .material-symbols-outlined {
+    font-size: 18px;
+}
+
+.hr-employee-filters {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 42px;
+    padding: 9px 12px;
+    margin: -8px 0 16px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    background: #fff;
+}
+
+.hr-resigned-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.hr-resigned-toggle input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+.hr-toggle-track {
+    position: relative;
+    width: 38px;
+    height: 22px;
+    flex-shrink: 0;
+    border-radius: 999px;
+    background: #cbd5e1;
+    transition: background-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.hr-toggle-thumb {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.25);
+    transition: transform 0.18s ease;
+}
+
+.hr-resigned-toggle input:checked + .hr-toggle-track {
+    background: var(--primary);
+}
+
+.hr-resigned-toggle input:checked + .hr-toggle-track .hr-toggle-thumb {
+    transform: translateX(16px);
+}
+
+.hr-resigned-toggle input:focus-visible + .hr-toggle-track {
+    box-shadow: 0 0 0 3px rgba(29, 108, 237, 0.2);
+}
+
+.hr-toggle-label {
+    color: #334155;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
+.hr-filter-hint {
+    color: #64748b;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.75rem;
+}
+
+@media (max-width: 640px) {
+    .hr-restore-banner {
+        align-items: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .hr-restore-copy {
+        width: calc(100% - 50px);
+        flex: initial;
+    }
+
+    .hr-restore-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .hr-employee-filters {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .hr-filter-hint {
+        padding-left: 47px;
+    }
 }
 
 /* ── Tab Bar ── */
@@ -1114,4 +1387,4 @@
     background: #eef3fd !important;
 }
 
-
+

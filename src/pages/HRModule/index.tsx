@@ -1,18 +1,30 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import './hr.css';
 import InviteStaffModal from './components/InviteStaffModal';
 import DepartmentManager from './components/DepartmentManager';
 import ManagerDepartmentTab from './components/ManagerDepartmentTab';
 import WorkScheduleTab from './components/WorkScheduleTab';
-import { getEmployees } from '../../api/hr';
+import { getEmployees, restoreEmployee } from '../../api/hr';
 import type { Employee } from '../../api/hr';
 import { useAuth } from '../../contexts/AuthContext';
+import { useRealtimeEvent } from '../../contexts/RealtimeContext';
+import { RT_EVENTS } from '../../api/realtime';
 
 
 const PAGE_SIZE = 10;
 
 type TabType = 'employees' | 'departments' | 'manager-depts' | 'work-schedule';
+
+interface RecentlyDeletedEmployee {
+  id: string;
+  fullName: string;
+  email: string;
+}
+
+interface HRLocationState {
+  recentlyDeletedEmployee?: RecentlyDeletedEmployee;
+}
 
 const STATUS_MAP: Record<string, { label: string; cls: string }> = {
   Working: { label: 'Đang làm việc', cls: 'hr-status-active' },
@@ -25,6 +37,9 @@ function getStatusCfg(status: string) {
 
 export default function HRModule() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const recentlyDeletedFromRoute = (location.state as HRLocationState | null)
+    ?.recentlyDeletedEmployee;
   const { user } = useAuth();
   const isTenantAdmin = user?.role === 'TenantAdmin';
   const isHRManager = user?.role === 'HRManager';
@@ -43,16 +58,31 @@ export default function HRModule() {
   const [totalCount, setTotalCount] = useState(0);
   const [hasPrevious, setHasPrevious] = useState(false);
   const [hasNext, setHasNext] = useState(false);
+  const [includeResigned, setIncludeResigned] = useState(false);
+  const [recentlyDeletedEmployee, setRecentlyDeletedEmployee] =
+    useState<RecentlyDeletedEmployee | null>(recentlyDeletedFromRoute ?? null);
+  const [restoringEmployee, setRestoringEmployee] = useState(false);
+  const [restoreError, setRestoreError] = useState('');
+  const [restoreSuccess, setRestoreSuccess] = useState('');
 
   // ── Modal state ──
   const [isInviteOpen, setIsInviteOpen] = useState(false);
 
   // ── Fetch employees ──
-  const fetchEmployees = useCallback(async (page: number, search: string) => {
+  const fetchEmployees = useCallback(async (
+    page: number,
+    search: string,
+    showResigned: boolean
+  ) => {
     setLoading(true);
     setFetchError('');
     try {
-      const res = await getEmployees({ pageNumber: page, pageSize: PAGE_SIZE, search });
+      const res = await getEmployees({
+        pageNumber: page,
+        pageSize: PAGE_SIZE,
+        search,
+        includeResigned: showResigned,
+      });
       setEmployees(res.items);
       setTotalPages(res.totalPages);
       setTotalCount(res.totalCount);
@@ -66,10 +96,23 @@ export default function HRModule() {
   }, []);
 
   useEffect(() => {
+    if (!recentlyDeletedFromRoute) return;
+
+    navigate(location.pathname, { replace: true, state: null });
+  }, [location.pathname, navigate, recentlyDeletedFromRoute]);
+
+  useEffect(() => {
     if (activeTab === 'employees') {
-      fetchEmployees(currentPage, searchTerm);
+      fetchEmployees(currentPage, searchTerm, includeResigned);
     }
-  }, [activeTab, currentPage, searchTerm, fetchEmployees]);
+  }, [activeTab, currentPage, searchTerm, includeResigned, fetchEmployees]);
+
+  // Realtime: nhân viên mới hoàn tất onboarding → làm tươi danh sách
+  useRealtimeEvent(RT_EVENTS.EMPLOYEE_ONBOARDED, () => {
+    if (activeTab === 'employees') {
+      fetchEmployees(currentPage, searchTerm, includeResigned);
+    }
+  });
 
   // Search submit
   const handleSearch = (e: React.FormEvent) => {
@@ -83,6 +126,37 @@ export default function HRModule() {
     setSearchInput('');
     setSearchTerm('');
     setCurrentPage(1);
+  };
+
+  const handleIncludeResignedChange = () => {
+    setCurrentPage(1);
+    setIncludeResigned((current) => !current);
+  };
+
+  const handleRestoreEmployee = async () => {
+    if (!recentlyDeletedEmployee || restoringEmployee) return;
+
+    setRestoringEmployee(true);
+    setRestoreError('');
+    setRestoreSuccess('');
+    try {
+      await restoreEmployee(recentlyDeletedEmployee.id);
+      setRecentlyDeletedEmployee(null);
+      setRestoreSuccess(
+        'Nhân sự và tài khoản đăng nhập liên kết đã được khôi phục trạng thái hoạt động.'
+      );
+      setCurrentPage(1);
+      await fetchEmployees(1, searchTerm, includeResigned);
+    } catch (err) {
+      const e = err as { response?: { data?: { error?: string; message?: string } } };
+      setRestoreError(
+        e?.response?.data?.error
+          || e?.response?.data?.message
+          || 'Không thể khôi phục nhân sự. Vui lòng thử lại.'
+      );
+    } finally {
+      setRestoringEmployee(false);
+    }
   };
 
   // Pagination helpers
@@ -198,12 +272,95 @@ export default function HRModule() {
               </div>
             </div>
 
+            {recentlyDeletedEmployee && (
+              <div className="hr-restore-banner" role="status">
+                <div className="hr-restore-icon">
+                  <span className="material-symbols-outlined">history</span>
+                </div>
+                <div className="hr-restore-copy">
+                  <strong>Nhân sự vừa bị xóa</strong>
+                  <span>
+                    {recentlyDeletedEmployee.fullName}
+                    {recentlyDeletedEmployee.email
+                      ? ` • ${recentlyDeletedEmployee.email}`
+                      : ''}
+                  </span>
+                  {restoreError && (
+                    <span className="hr-restore-error" role="alert">
+                      {restoreError}
+                    </span>
+                  )}
+                </div>
+                <div className="hr-restore-actions">
+                  <button
+                    type="button"
+                    className="hr-restore-dismiss"
+                    onClick={() => {
+                      setRecentlyDeletedEmployee(null);
+                      setRestoreError('');
+                    }}
+                    disabled={restoringEmployee}
+                  >
+                    Bỏ qua
+                  </button>
+                  <button
+                    type="button"
+                    className="hr-restore-button"
+                    onClick={handleRestoreEmployee}
+                    disabled={restoringEmployee}
+                  >
+                    <span
+                      className={`material-symbols-outlined ${restoringEmployee ? 'hr-loading-spin' : ''}`}
+                    >
+                      {restoringEmployee ? 'progress_activity' : 'restore'}
+                    </span>
+                    {restoringEmployee ? 'Đang khôi phục...' : 'Khôi phục nhân sự'}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {restoreSuccess && (
+              <div className="hr-restore-success" role="status">
+                <span className="material-symbols-outlined">check_circle</span>
+                <span>{restoreSuccess}</span>
+                <button
+                  type="button"
+                  aria-label="Đóng thông báo"
+                  onClick={() => setRestoreSuccess('')}
+                >
+                  <span className="material-symbols-outlined">close</span>
+                </button>
+              </div>
+            )}
+
+            <div className="hr-employee-filters">
+              <label className="hr-resigned-toggle">
+                <input
+                  type="checkbox"
+                  checked={includeResigned}
+                  onChange={handleIncludeResignedChange}
+                />
+                <span className="hr-toggle-track" aria-hidden="true">
+                  <span className="hr-toggle-thumb" />
+                </span>
+                <span className="hr-toggle-label">Hiển thị nhân sự đã nghỉ việc</span>
+              </label>
+              {includeResigned && (
+                <span className="hr-filter-hint">
+                  Danh sách đang bao gồm nhân sự có trạng thái Resigned
+                </span>
+              )}
+            </div>
+
             {/* Error banner */}
             {fetchError && (
               <div className="hr-fetch-error">
                 <span className="material-symbols-outlined">error</span>
                 {fetchError}
-                <button onClick={() => fetchEmployees(currentPage, searchTerm)}>
+                <button
+                  onClick={() => fetchEmployees(currentPage, searchTerm, includeResigned)}
+                >
                   Thử lại
                 </button>
               </div>
@@ -246,6 +403,7 @@ export default function HRModule() {
                     ) : (
                       employees.map((emp) => {
                         const st = getStatusCfg(emp.status);
+                        const isResigned = emp.status === 'Resigned';
                         const initials = emp.fullName
                           .split(' ')
                           .slice(-2)
@@ -255,12 +413,12 @@ export default function HRModule() {
                           ? new Date(emp.hireDate).toLocaleDateString('vi-VN')
                           : '—';
                         return (
-                          <tr key={emp.id}>
+                          <tr key={emp.id} className={isResigned ? 'hr-row-resigned' : undefined}>
                             <td>
                               <div className="flex items-center gap-3">
                                 <div
                                   className="hr-avatar"
-                                  style={{ background: '#1d6ced' }}
+                                  style={{ background: isResigned ? '#94a3b8' : '#1d6ced' }}
                                 >
                                   {initials || '?'}
                                 </div>
@@ -385,7 +543,9 @@ export default function HRModule() {
         onClose={() => setIsInviteOpen(false)}
         onSuccess={() => {
           // Refresh employee list after invite
-          if (activeTab === 'employees') fetchEmployees(currentPage, searchTerm);
+          if (activeTab === 'employees') {
+            fetchEmployees(currentPage, searchTerm, includeResigned);
+          }
         }}
       />
     </div>

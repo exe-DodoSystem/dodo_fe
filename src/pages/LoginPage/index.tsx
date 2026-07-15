@@ -21,9 +21,11 @@ export default function LoginPage() {
     const result = await login(email, password);
     setLoading(false);
     if (result.success) {
-      // SystemAdmin đi vào /system, các role khác đi vào /app
+      // SystemAdmin không thuộc tenant; tenant hết hạn chỉ được đi vào luồng gia hạn.
       if (result.role === 'SystemAdmin') {
         navigate('/system/dashboard', { replace: true });
+      } else if (result.isExpired) {
+        navigate('/renew', { replace: true });
       } else {
         navigate(from && from !== '/login' ? from : '/app/hr', { replace: true });
       }

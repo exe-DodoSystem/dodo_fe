@@ -5,18 +5,36 @@ import { loginApi, getMyModulesApi, getUserProfile, updateAvatarApi } from '../a
 
 function decodeJwtPayload(token: string): Record<string, unknown> {
   try {
-    const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
-    return JSON.parse(atob(base64));
+    const encodedPayload = token.split('.')[1];
+    if (!encodedPayload) return {};
+
+    const base64 = encodedPayload.replace(/-/g, '+').replace(/_/g, '/');
+    const paddedBase64 = base64.padEnd(Math.ceil(base64.length / 4) * 4, '=');
+    return JSON.parse(atob(paddedBase64));
   } catch {
     return {};
   }
+}
+
+function hasExpiredClaim(token: string | null): boolean {
+  if (!token) return false;
+  const value = decodeJwtPayload(token)['isExpired'];
+  return value === true || (typeof value === 'string' && value.toLowerCase() === 'true');
+}
+
+interface LoginResult {
+  success: boolean;
+  error?: string;
+  role?: string;
+  isExpired?: boolean;
 }
 
 interface AuthContextType {
   user: User | null;
   tenant: Tenant | null;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<{ success: boolean; error?: string; role?: string }>;
+  isExpired: boolean;
+  login: (email: string, password: string) => Promise<LoginResult>;
   logout: () => void;
   refreshModules: () => Promise<void>;
   updateUserAvatar: (url: string) => void;
@@ -34,6 +52,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const saved = localStorage.getItem('dodo_tenant');
     return saved ? JSON.parse(saved) : null;
   });
+  const [isExpired, setIsExpired] = useState<boolean>(() =>
+    hasExpiredClaim(localStorage.getItem('dodo_token'))
+  );
 
   const login = useCallback(async (email: string, password: string) => {
     try {
@@ -52,6 +73,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         (payload['tenantId'] as string) ?? '';
       const userId =
         (payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'] as string) ?? '';
+      // Response là nguồn chính; claim giúp giữ đúng trạng thái khi reload và fail-safe khi contract lệch nhau.
+      const sessionExpired =
+        role !== 'SystemAdmin' && (authData.isExpired || hasExpiredClaim(authData.token));
 
       // 4. Tạo User object
       const userData: User = {
@@ -70,7 +94,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       let purchasedModules: ModuleId[] = [];
       let trialModules: ModuleId[] = [];
 
-      if (role !== 'SystemAdmin') {
+      if (role !== 'SystemAdmin' && !sessionExpired) {
         const subscriptions = await getMyModulesApi();
         purchasedModules = subscriptions
           .filter((s) => s.status !== 'Expired')
@@ -93,6 +117,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // 7. Lưu vào state + localStorage
       setUser(userData);
       setTenant(tenantData);
+      setIsExpired(sessionExpired);
       localStorage.setItem('dodo_user', JSON.stringify(userData));
       localStorage.setItem('dodo_tenant', JSON.stringify(tenantData));
 
@@ -106,7 +131,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         });
       }).catch(() => {});
 
-      return { success: true, role };
+      return { success: true, role, isExpired: sessionExpired };
     } catch (error: unknown) {
       const axiosError = error as {
         response?: { data?: { message?: string; title?: string } };
@@ -153,6 +178,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = useCallback(() => {
     setUser(null);
     setTenant(null);
+    setIsExpired(false);
     localStorage.removeItem('dodo_user');
     localStorage.removeItem('dodo_tenant');
     localStorage.removeItem('dodo_token');
@@ -171,22 +197,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .filter((s) => s.status === 'Trial')
         .map((s) => MODULE_ID_MAP[s.moduleId])
         .filter((m): m is ModuleId => m !== undefined);
-      setTenant((prev) =>
-        prev ? { ...prev, purchasedModules, trialModules } : prev
-      );
-      // Sync to localStorage
       setTenant((prev) => {
-        if (prev) localStorage.setItem('dodo_tenant', JSON.stringify(prev));
-        return prev;
+        if (!prev) return prev;
+        const updated = { ...prev, purchasedModules, trialModules };
+        localStorage.setItem('dodo_tenant', JSON.stringify(updated));
+        return updated;
       });
     } catch {
       // silent fail — user can retry
     }
-  }, []);
+  }, [user?.role]);
 
   return (
     <AuthContext.Provider
-      value={{ user, tenant, isAuthenticated: !!user, login, logout, refreshModules, updateUserAvatar, uploadAvatar }}
+      value={{ user, tenant, isAuthenticated: !!user, isExpired, login, logout, refreshModules, updateUserAvatar, uploadAvatar }}
     >
       {children}
     </AuthContext.Provider>

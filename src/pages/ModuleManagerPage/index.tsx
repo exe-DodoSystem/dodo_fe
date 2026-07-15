@@ -1,23 +1,68 @@
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { ALL_MODULES } from '../../types/auth';
 import type { ModuleDefinition, ModuleId } from '../../types/auth';
 import { getMyModulesApi } from '../../api/auth';
-import { getBillingOrders, createPaymentUrl, simulatePaymentSuccess } from '../../api/payment';
+import {
+  createPayment,
+  getBillingOrders,
+  type BillingOrder,
+  type SePayPaymentInfo,
+} from '../../api/payment';
+import SePayPaymentModal from '../../components/SePayPaymentModal';
 import './module-manager.css';
 
 type ModuleStatus = 'active' | 'trial' | 'locked';
+type SyncState = 'idle' | 'syncing' | 'done' | 'error';
 
-function getModuleStatus(mod: ModuleDefinition, purchasedModules: ModuleId[], trialModules: ModuleId[]): ModuleStatus {
+function getModuleStatus(
+  mod: ModuleDefinition,
+  purchasedModules: ModuleId[],
+  trialModules: ModuleId[]
+): ModuleStatus {
   if (!purchasedModules.includes(mod.id)) return 'locked';
   if (trialModules.includes(mod.id)) return 'trial';
   return 'active';
 }
 
 function formatDate(dateStr: string): string {
-  const d = new Date(dateStr);
-  return d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  const date = new Date(dateStr);
+  return date.toLocaleDateString('vi-VN', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  });
+}
+
+function buildEndDateMap(
+  subscriptions: Awaited<ReturnType<typeof getMyModulesApi>>
+): Record<number, string> {
+  const map: Record<number, string> = {};
+  subscriptions.forEach((subscription) => {
+    if (subscription.endDate) map[subscription.moduleId] = subscription.endDate;
+  });
+  return map;
+}
+
+function selectLatestPendingOrder(orders: BillingOrder[]): BillingOrder | null {
+  return orders
+    .filter((order) => String(order.paymentStatus).toLowerCase() === 'pending')
+    .sort((left, right) => {
+      const rightDate = new Date(right.createdAt ?? right.billingDate).getTime();
+      const leftDate = new Date(left.createdAt ?? left.billingDate).getTime();
+      return rightDate - leftDate;
+    })[0] ?? null;
+}
+
+function getErrorMessage(error: unknown, fallback: string): string {
+  const apiError = error as {
+    response?: { data?: { error?: string; message?: string; title?: string } };
+  };
+  return apiError.response?.data?.error
+    || apiError.response?.data?.message
+    || apiError.response?.data?.title
+    || (error instanceof Error ? error.message : fallback);
 }
 
 const STATUS_CONFIG = {
@@ -32,20 +77,33 @@ export default function ModuleManagerPage() {
   const [paying, setPaying] = useState(false);
   const [payError, setPayError] = useState('');
   const [paySuccess, setPaySuccess] = useState(false);
+  const [syncState, setSyncState] = useState<SyncState>('idle');
   const [loadingModules, setLoadingModules] = useState(true);
   const [endDateMap, setEndDateMap] = useState<Record<number, string>>({});
+  const [paymentInfo, setPaymentInfo] = useState<SePayPaymentInfo | null>(null);
+
+  const loadModuleData = useCallback(async () => {
+    const [, subscriptions] = await Promise.all([
+      refreshModules(),
+      getMyModulesApi(),
+    ]);
+    return buildEndDateMap(subscriptions);
+  }, [refreshModules]);
 
   useEffect(() => {
-    setLoadingModules(true);
-    Promise.all([
-      refreshModules(),
-      getMyModulesApi().then((subs) => {
-        const map: Record<number, string> = {};
-        subs.forEach((s) => { if (s.endDate) map[s.moduleId] = s.endDate; });
-        setEndDateMap(map);
-      }),
-    ]).finally(() => setLoadingModules(false));
-  }, [refreshModules]);
+    let active = true;
+    loadModuleData()
+      .then((map) => {
+        if (active) setEndDateMap(map);
+      })
+      .catch(() => {
+        // Context giữ dữ liệu cache để trang vẫn dùng được khi refresh tạm thời lỗi.
+      })
+      .finally(() => {
+        if (active) setLoadingModules(false);
+      });
+    return () => { active = false; };
+  }, [loadModuleData]);
 
   if (!tenant || loadingModules) {
     return (
@@ -60,6 +118,7 @@ export default function ModuleManagerPage() {
 
   const { purchasedModules, trialModules } = tenant;
   const hasTrial = trialModules.length > 0;
+  const paymentLocked = paying || paySuccess || syncState === 'syncing';
 
   const modulesWithStatus = ALL_MODULES.map((mod) => ({
     ...mod,
@@ -67,24 +126,50 @@ export default function ModuleManagerPage() {
   }));
 
   const handlePay = async () => {
+    if (paying || paymentInfo) return;
     setPayError('');
+    setPaySuccess(false);
+    setSyncState('idle');
     setPaying(true);
     try {
       const orders = await getBillingOrders();
-      const pendingOrder = orders.find((o) => o.paymentStatus === 'Pending');
+      const pendingOrder = selectLatestPendingOrder(orders);
       if (!pendingOrder) {
         setPayError('Không tìm thấy đơn hàng đang chờ thanh toán.');
         return;
       }
-      const payUrl = await createPaymentUrl(pendingOrder.id);
-      window.open(payUrl, '_blank');
-      await simulatePaymentSuccess(pendingOrder.id);
-      await refreshModules();
-      setPaySuccess(true);
-    } catch {
-      setPayError('Thanh toán thất bại. Vui lòng thử lại.');
+
+      const result = await createPayment(pendingOrder.id);
+      if (result.kind === 'redirect') {
+        window.location.assign(result.url);
+        return;
+      }
+      setPaymentInfo(result.info);
+    } catch (error: unknown) {
+      setPayError(getErrorMessage(
+        error,
+        'Không thể khởi tạo thanh toán. Vui lòng thử lại.'
+      ));
     } finally {
       setPaying(false);
+    }
+  };
+
+  const handlePaid = async () => {
+    setPaymentInfo(null);
+    setPaySuccess(true);
+    setPayError('');
+    setSyncState('syncing');
+    try {
+      const map = await loadModuleData();
+      setEndDateMap(map);
+      setSyncState('done');
+    } catch {
+      setSyncState('error');
+      setPayError(
+        'Thanh toán đã thành công nhưng chưa thể làm mới dữ liệu module. '
+        + 'Vui lòng tải lại trang sau ít phút.'
+      );
     }
   };
 
@@ -102,7 +187,7 @@ export default function ModuleManagerPage() {
         </div>
 
         {hasTrial && !paySuccess && (
-          <button className="mm-pay-btn" onClick={handlePay} disabled={paying}>
+          <button className="mm-pay-btn" onClick={handlePay} disabled={paymentLocked}>
             {paying
               ? <><span className="material-symbols-outlined mm-spin">progress_activity</span>Đang xử lý...</>
               : <><span className="material-symbols-outlined">payment</span>Thanh toán tất cả Trial</>
@@ -112,9 +197,21 @@ export default function ModuleManagerPage() {
       </div>
 
       {paySuccess && (
-        <div className="mm-banner mm-banner-success">
-          <span className="material-symbols-outlined">check_circle</span>
-          <span>Thanh toán thành công! Các module đã được kích hoạt.</span>
+        <div className={`mm-banner ${syncState === 'error' ? 'mm-banner-warning' : 'mm-banner-success'}`}>
+          <span className={`material-symbols-outlined${syncState === 'syncing' ? ' mm-spin' : ''}`}>
+            {syncState === 'syncing'
+              ? 'progress_activity'
+              : syncState === 'error'
+              ? 'schedule'
+              : 'check_circle'}
+          </span>
+          <span>
+            {syncState === 'syncing'
+              ? 'Đã ghi nhận thanh toán. Đang cập nhật trạng thái module...'
+              : syncState === 'error'
+              ? 'Thanh toán thành công. Dữ liệu module sẽ được cập nhật sau ít phút.'
+              : 'Thanh toán thành công! Dữ liệu module đã được làm mới.'}
+          </span>
         </div>
       )}
       {payError && (
@@ -127,7 +224,8 @@ export default function ModuleManagerPage() {
         <div className="mm-banner mm-banner-warning">
           <span className="material-symbols-outlined">info</span>
           <span>
-            Bạn đang có <strong>{trialModules.length} module</strong> dùng thử. Hãy thanh toán để kích hoạt đầy đủ trước khi mua thêm module mới.
+            Bạn đang có <strong>{trialModules.length} module</strong> dùng thử. Hãy thanh
+            toán để kích hoạt đầy đủ trước khi mua thêm module mới.
           </span>
         </div>
       )}
@@ -135,11 +233,11 @@ export default function ModuleManagerPage() {
       <div className="mm-table-wrap">
         <table className="mm-table">
           <colgroup>
-            <col style={{ width: '26%' }} />{/* Module */}
-            <col style={{ width: '18%' }} />{/* Giá/tháng */}
-            <col style={{ width: '22%' }} />{/* Ngày hết hạn */}
-            <col style={{ width: '18%' }} />{/* Trạng thái */}
-            <col style={{ width: '16%' }} />{/* Thao tác */}
+            <col style={{ width: '26%' }} />
+            <col style={{ width: '18%' }} />
+            <col style={{ width: '22%' }} />
+            <col style={{ width: '18%' }} />
+            <col style={{ width: '16%' }} />
           </colgroup>
           <thead>
             <tr>
@@ -158,22 +256,22 @@ export default function ModuleManagerPage() {
 
               return (
                 <tr key={mod.id} className={`mm-row mm-row-${mod.status}`}>
-                  {/* Module name + icon */}
                   <td>
                     <div className="mm-mod-name">
-                      <div className="mm-mod-icon" style={{ background: `${mod.color}18`, color: mod.color }}>
+                      <div
+                        className="mm-mod-icon"
+                        style={{ background: `${mod.color}18`, color: mod.color }}
+                      >
                         <span className="material-symbols-outlined">{mod.icon}</span>
                       </div>
                       <span className="mm-mod-label">{mod.label}</span>
                     </div>
                   </td>
 
-                  {/* Price */}
                   <td className="mm-mod-price">
                     {mod.monthlyPrice.toLocaleString('vi-VN')} ₫
                   </td>
 
-                  {/* End date */}
                   <td className="mm-mod-enddate">
                     {endDate ? (
                       <span className="mm-enddate-value">
@@ -185,7 +283,6 @@ export default function ModuleManagerPage() {
                     )}
                   </td>
 
-                  {/* Status badge */}
                   <td>
                     <span className={`mm-badge ${cfg.badgeClass}`}>
                       <span className="material-symbols-outlined mm-badge-icon">{cfg.icon}</span>
@@ -193,7 +290,6 @@ export default function ModuleManagerPage() {
                     </span>
                   </td>
 
-                  {/* Action */}
                   <td>
                     {mod.status === 'active' && (
                       <span className="mm-action-text mm-action-active">
@@ -205,17 +301,21 @@ export default function ModuleManagerPage() {
                       <button
                         className="mm-action-btn mm-action-pay"
                         onClick={handlePay}
-                        disabled={paying}
+                        disabled={paymentLocked}
                       >
-                        <span className="material-symbols-outlined">payment</span>
-                        Thanh toán
+                        <span className="material-symbols-outlined">
+                          {paySuccess ? 'check' : 'payment'}
+                        </span>
+                        {paySuccess ? 'Đã thanh toán' : 'Thanh toán'}
                       </button>
                     )}
                     {mod.status === 'locked' && (
                       <button
                         className="mm-action-btn mm-action-buy"
                         disabled={isLockedDisabled}
-                        title={isLockedDisabled ? 'Thanh toán module Trial trước khi mua mới' : undefined}
+                        title={isLockedDisabled
+                          ? 'Thanh toán module Trial trước khi mua mới'
+                          : undefined}
                       >
                         <span className="material-symbols-outlined">
                           {isLockedDisabled ? 'lock' : 'add_shopping_cart'}
@@ -230,6 +330,13 @@ export default function ModuleManagerPage() {
           </tbody>
         </table>
       </div>
+
+      <SePayPaymentModal
+        open={!!paymentInfo}
+        payment={paymentInfo}
+        onClose={() => setPaymentInfo(null)}
+        onPaid={handlePaid}
+      />
     </div>
   );
 }

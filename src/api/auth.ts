@@ -10,6 +10,7 @@ export interface LoginResponse {
   phone: string;
   isActive: boolean;
   isDeleted: boolean;
+  isExpired: boolean;
   token: string;
   refreshToken: string;
   tenantName: string;

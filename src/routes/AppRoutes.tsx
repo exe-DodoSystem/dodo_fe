@@ -4,6 +4,8 @@ import LoginPage          from '../pages/LoginPage';
 import RegisterPage       from '../pages/RegisterPage';
 import ProductsPage       from '../pages/ProductsPage';
 import InviteCompletePage from '../pages/InviteCompletePage';
+import RenewPage          from '../pages/RenewPage';
+import RenewRoute         from './RenewRoute';
 
 // Tenant app
 import AppLayout          from '../layouts/AppLayout';
@@ -33,6 +35,16 @@ export default function AppRoutes() {
       <Route path="/register"        element={<RegisterPage />} />
       <Route path="/products"        element={<ProductsPage />} />
       <Route path="/invite/complete" element={<InviteCompletePage />} />
+
+      {/* Tenant renewal — authenticated but outside the main app shell */}
+      <Route
+        path="/renew"
+        element={
+          <RenewRoute>
+            <RenewPage />
+          </RenewRoute>
+        }
+      />
 
       {/* ── Tenant app (/app/*) ── */}
       <Route

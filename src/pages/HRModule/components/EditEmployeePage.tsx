@@ -18,6 +18,10 @@ const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
   Probation: { label: 'Thử việc',      color: '#3b82f6' },
 };
 
+function toDateInputValue(value: string | null | undefined) {
+  return value ? value.slice(0, 10) : '';
+}
+
 export default function EditEmployeePage() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
@@ -41,8 +45,10 @@ export default function EditEmployeePage() {
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+  const [resignationDateError, setResignationDateError] = useState('');
 
   // ── Fetch positions of selected department ──
   const loadPositions = useCallback(async (deptId: string) => {
@@ -74,8 +80,8 @@ export default function EditEmployeePage() {
         setFullName(emp.fullName || '');
         setEmail(emp.email || '');
         setPhone(emp.phone || '');
-        setHireDate(emp.hireDate || '');
-        setResignationDate(emp.resignationDate || '');
+        setHireDate(toDateInputValue(emp.hireDate));
+        setResignationDate(toDateInputValue(emp.resignationDate));
         setBaseSalary(emp.baseSalary || 0);
         setStatus(emp.status || 'Working');
         setUserId(emp.userId);
@@ -99,6 +105,20 @@ export default function EditEmployeePage() {
     init();
   }, [id]);
 
+  useEffect(() => {
+    if (!confirmDelete) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && !deleting) {
+        setConfirmDelete(false);
+        setDeleteError('');
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [confirmDelete, deleting]);
+
   // ── Handle department change ──
   const handleDepartmentChange = async (newDeptId: string) => {
     setDepartmentId(newDeptId);
@@ -106,16 +126,33 @@ export default function EditEmployeePage() {
     await loadPositions(newDeptId);
   };
 
+  const handleStatusChange = (newStatus: string) => {
+    setStatus(newStatus);
+    setResignationDateError('');
+
+    if (newStatus !== 'Resigned') {
+      setResignationDate('');
+    }
+  };
+
   // ── Form submit ──
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!id) return;
-    setSaving(true);
     setErrorMsg('');
     setSuccessMsg('');
 
-    // If status is not Resigned, resignationDate should be null
-    const finalResignationDate = status === 'Resigned' ? resignationDate || null : null;
+    if (status === 'Resigned' && !resignationDate) {
+      const message = 'Vui lòng chọn ngày nghỉ việc khi chuyển trạng thái sang Đã nghỉ việc.';
+      setResignationDateError(message);
+      setErrorMsg(message);
+      return;
+    }
+
+    setResignationDateError('');
+    setSaving(true);
+
+    const finalResignationDate = status === 'Resigned' ? resignationDate : null;
 
     try {
       await updateEmployee(id, {
@@ -144,15 +181,31 @@ export default function EditEmployeePage() {
   const handleDelete = async () => {
     if (!id) return;
     setDeleting(true);
+    setDeleteError('');
     setErrorMsg('');
+    setSuccessMsg('');
     try {
       await deleteEmployee(id);
-      setSuccessMsg('Đã xóa nhân sự khỏi hệ thống.');
-      setTimeout(() => navigate('/app/hr'), 1500);
+      setConfirmDelete(false);
+      setSuccessMsg('Đã xóa nhân sự khỏi hệ thống. Tài khoản đăng nhập đã bị vô hiệu hóa.');
+      setTimeout(() => {
+        navigate('/app/hr', {
+          state: {
+            recentlyDeletedEmployee: {
+              id,
+              fullName: fullName || 'Nhân sự chưa có tên',
+              email: email || '',
+            },
+          },
+        });
+      }, 1500);
     } catch (err) {
       const e = err as { response?: { data?: { error?: string; message?: string } } };
-      setErrorMsg(e?.response?.data?.error || e?.response?.data?.message || 'Không thể xóa nhân viên.');
-      setConfirmDelete(false);
+      setDeleteError(
+        e?.response?.data?.error
+          || e?.response?.data?.message
+          || 'Không thể xóa nhân viên. Vui lòng thử lại.'
+      );
     } finally {
       setDeleting(false);
     }
@@ -379,22 +432,6 @@ export default function EditEmployeePage() {
                   />
                 </div>
 
-                {status === 'Resigned' && (
-                  <div className="edit-field-group full-width">
-                    <label className="edit-label">
-                      Ngày nghỉ việc <span className="edit-required">*</span>
-                    </label>
-                    <input
-                      type="date"
-                      value={resignationDate}
-                      onChange={(e) => setResignationDate(e.target.value)}
-                      className="edit-input"
-                      required
-                      disabled={saving}
-                    />
-                  </div>
-                )}
-
                 <div className="edit-field-group full-width">
                   <label className="edit-label">Trạng thái làm việc</label>
                   <div className="edit-status-group">
@@ -408,7 +445,7 @@ export default function EditEmployeePage() {
                           name="status"
                           value={s}
                           checked={status === s}
-                          onChange={(e) => setStatus(e.target.value)}
+                          onChange={(e) => handleStatusChange(e.target.value)}
                           style={{ display: 'none' }}
                           disabled={saving}
                         />
@@ -421,48 +458,67 @@ export default function EditEmployeePage() {
                     ))}
                   </div>
                 </div>
+
+                {status === 'Resigned' && (
+                  <div className="edit-resignation-panel full-width">
+                    <div className="edit-resigned-notice">
+                      <span className="material-symbols-outlined">warning</span>
+                      <div>
+                        <strong>Trạng thái này sẽ vô hiệu hóa tài khoản đăng nhập.</strong>
+                        <span>
+                          Nhân sự sẽ không thể đăng nhập sau khi bạn lưu thay đổi.
+                        </span>
+                      </div>
+                    </div>
+                    <div className="edit-field-group">
+                      <label className="edit-label" htmlFor="resignation-date">
+                        Ngày nghỉ việc <span className="edit-required">*</span>
+                      </label>
+                      <input
+                        id="resignation-date"
+                        type="date"
+                        value={resignationDate}
+                        onChange={(e) => {
+                          setResignationDate(e.target.value);
+                          setResignationDateError('');
+                        }}
+                        onInvalid={(e) => {
+                          e.preventDefault();
+                          const message = 'Vui lòng chọn ngày nghỉ việc.';
+                          setResignationDateError(message);
+                          setErrorMsg(message);
+                        }}
+                        className={`edit-input ${resignationDateError ? 'has-error' : ''}`}
+                        required
+                        aria-invalid={Boolean(resignationDateError)}
+                        aria-describedby={resignationDateError ? 'resignation-date-error' : undefined}
+                        disabled={saving}
+                      />
+                      {resignationDateError && (
+                        <span id="resignation-date-error" className="edit-field-error">
+                          {resignationDateError}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
             {/* Actions */}
             <div className="edit-actions-row">
-              {confirmDelete ? (
-                <div
-                  className="flex items-center gap-2"
-                  style={{ marginRight: 'auto' }}
-                >
-                  <span className="text-xs font-semibold text-rose-600 font-inter">
-                    Xác nhận xóa nhân sự này khỏi hệ thống?
-                  </span>
-                  <button
-                    type="button"
-                    className="edit-avatar-btn danger"
-                    onClick={handleDelete}
-                    disabled={deleting}
-                  >
-                    {deleting ? 'Đang xóa...' : 'Xóa'}
-                  </button>
-                  <button
-                    type="button"
-                    className="edit-btn-cancel"
-                    style={{ padding: '6px 12px' }}
-                    onClick={() => setConfirmDelete(false)}
-                    disabled={deleting}
-                  >
-                    Hủy
-                  </button>
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  className="edit-btn-cancel hover:border-rose-400 hover:text-rose-600"
-                  style={{ marginRight: 'auto' }}
-                  onClick={() => setConfirmDelete(true)}
-                  disabled={saving || deleting}
-                >
-                  Xóa nhân sự
-                </button>
-              )}
+              <button
+                type="button"
+                className="edit-btn-delete"
+                onClick={() => {
+                  setDeleteError('');
+                  setConfirmDelete(true);
+                }}
+                disabled={saving || deleting}
+              >
+                <span className="material-symbols-outlined">delete</span>
+                Xóa nhân sự
+              </button>
 
               <button
                 type="button"
@@ -492,6 +548,77 @@ export default function EditEmployeePage() {
             </div>
           </div>
         </form>
+
+        {confirmDelete && (
+          <div
+            className="edit-delete-overlay"
+            onMouseDown={(event) => {
+              if (event.target === event.currentTarget && !deleting) {
+                setConfirmDelete(false);
+                setDeleteError('');
+              }
+            }}
+          >
+            <div
+              className="edit-delete-dialog"
+              role="alertdialog"
+              aria-modal="true"
+              aria-labelledby="delete-employee-title"
+              aria-describedby="delete-employee-description"
+            >
+              <div className="edit-delete-icon" aria-hidden="true">
+                <span className="material-symbols-outlined">person_remove</span>
+              </div>
+              <div className="edit-delete-content">
+                <h2 id="delete-employee-title">Xóa nhân sự?</h2>
+                <p id="delete-employee-description">
+                  Hành động này sẽ ẩn vĩnh viễn nhân sự khỏi danh sách và vô hiệu hóa
+                  hoàn toàn tài khoản đăng nhập của họ. Bạn có chắc chắn muốn xóa?
+                </p>
+                <div className="edit-delete-employee">
+                  <span className="material-symbols-outlined">badge</span>
+                  <div>
+                    <strong>{fullName || 'Nhân sự chưa có tên'}</strong>
+                    <span>{email || 'Không có email'}</span>
+                  </div>
+                </div>
+                {deleteError && (
+                  <div className="edit-delete-error" role="alert">
+                    <span className="material-symbols-outlined">error</span>
+                    {deleteError}
+                  </div>
+                )}
+              </div>
+              <div className="edit-delete-actions">
+                <button
+                  type="button"
+                  className="edit-btn-cancel"
+                  autoFocus
+                  onClick={() => {
+                    setConfirmDelete(false);
+                    setDeleteError('');
+                  }}
+                  disabled={deleting}
+                >
+                  Hủy bỏ
+                </button>
+                <button
+                  type="button"
+                  className="edit-delete-confirm"
+                  onClick={handleDelete}
+                  disabled={deleting}
+                >
+                  {deleting ? (
+                    <span className="material-symbols-outlined dm-spin">progress_activity</span>
+                  ) : (
+                    <span className="material-symbols-outlined">delete_forever</span>
+                  )}
+                  {deleting ? 'Đang xóa...' : 'Xác nhận xóa'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );
