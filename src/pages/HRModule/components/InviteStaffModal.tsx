@@ -104,12 +104,13 @@ export default function InviteStaffModal({
         handleClose();
       }, 1800);
     } catch (err: unknown) {
-      const axiosErr = err as {
-        response?: { data?: { message?: string; title?: string } };
-      };
+      const data = (
+        err as { response?: { data?: { error?: string; message?: string; title?: string } } }
+      )?.response?.data;
       setError(
-        axiosErr?.response?.data?.message ||
-          axiosErr?.response?.data?.title ||
+        data?.error ||
+          data?.message ||
+          data?.title ||
           'Gửi lời mời thất bại. Vui lòng thử lại.'
       );
     } finally {

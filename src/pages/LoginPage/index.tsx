@@ -1,13 +1,14 @@
 import { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import "./login.css";
 
 export default function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   const { login } = useAuth();
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(searchParams.get("email") ?? "");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
@@ -25,7 +26,9 @@ export default function LoginPage() {
       if (result.role === 'SystemAdmin') {
         navigate('/system/dashboard', { replace: true });
       } else {
-        navigate(from && from !== '/login' ? from : '/app/hr', { replace: true });
+        // Employee vào Chấm công, các role khác vào HR
+        const defaultPath = result.role === 'Employee' ? '/app/attendance' : '/app/hr';
+        navigate(from && from !== '/login' ? from : defaultPath, { replace: true });
       }
     } else {
       setError(result.error || "Đăng nhập thất bại.");

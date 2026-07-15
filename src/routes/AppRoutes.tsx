@@ -3,7 +3,7 @@ import LandingPage        from '../pages/LandingPage';
 import LoginPage          from '../pages/LoginPage';
 import RegisterPage       from '../pages/RegisterPage';
 import ProductsPage       from '../pages/ProductsPage';
-import InviteCompletePage from '../pages/InviteCompletePage';
+import OnboardingPage     from '../pages/OnboardingPage';
 
 // Tenant app
 import AppLayout          from '../layouts/AppLayout';
@@ -32,7 +32,7 @@ export default function AppRoutes() {
       <Route path="/login"           element={<LoginPage />} />
       <Route path="/register"        element={<RegisterPage />} />
       <Route path="/products"        element={<ProductsPage />} />
-      <Route path="/invite/complete" element={<InviteCompletePage />} />
+      <Route path="/onboard/:token"  element={<OnboardingPage />} />
 
       {/* ── Tenant app (/app/*) ── */}
       <Route

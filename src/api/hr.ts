@@ -1,4 +1,15 @@
+import axios from 'axios';
 import axiosClient from './axiosClient';
+
+/**
+ * Public onboarding endpoints (`/api/hr/invites/validate` & `/complete`) are
+ * [AllowAnonymous]. They must NOT carry the logged-in user's Authorization
+ * header — and we deliberately bypass axiosClient so its 401 → /login
+ * interceptor can never hijack the onboarding flow. Same-origin baseURL ''.
+ */
+const publicClient = axios.create({
+  headers: { 'Content-Type': 'application/json' },
+});
 
 export interface Employee {
   id: string;
@@ -59,6 +70,17 @@ export interface CompleteInviteRequest {
   fullName: string;
   password: string;
   phone: string;
+}
+
+/** Shape returned by GET /api/hr/invites/validate (200 even when used/expired). */
+export interface ValidateInviteResponse {
+  email: string;
+  tenantId: string;
+  roleId: number;
+  departmentId: string | null;
+  positionId: string | null;
+  expiryDate: string; // ISO
+  isUsed: boolean;
 }
 
 export interface GetEmployeesParams {
@@ -213,10 +235,24 @@ export async function sendInvite(payload: SendInviteRequest): Promise<void> {
   await axiosClient.post('/api/hr/invites/send', payload);
 }
 
+/**
+ * Validate an invite token. The BE returns 200 even when the invite is already
+ * used or expired — callers MUST inspect `isUsed` and `expiryDate` themselves.
+ * A 400 here means the token doesn't exist at all.
+ */
+export async function validateInvite(
+  token: string
+): Promise<ValidateInviteResponse> {
+  const res = await publicClient.get<ValidateInviteResponse>(
+    `/api/hr/invites/validate?token=${encodeURIComponent(token)}`
+  );
+  return res.data;
+}
+
 export async function completeInvite(
   payload: CompleteInviteRequest
 ): Promise<void> {
-  await axiosClient.post('/api/hr/invites/complete', payload);
+  await publicClient.post('/api/hr/invites/complete', payload);
 }
 
 export interface ShiftSegment {
