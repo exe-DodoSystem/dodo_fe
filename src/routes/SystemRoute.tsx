@@ -7,7 +7,7 @@ import type { ReactNode } from 'react';
  * Các role khác được redirect về /app/dashboard.
  */
 export default function SystemRoute({ children }: { children: ReactNode }) {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, isExpired } = useAuth();
   const location = useLocation();
 
   if (!isAuthenticated) {
@@ -15,7 +15,7 @@ export default function SystemRoute({ children }: { children: ReactNode }) {
   }
 
   if (user?.role !== 'SystemAdmin') {
-    return <Navigate to="/app/dashboard" replace />;
+    return <Navigate to={isExpired ? '/renew' : '/app/dashboard'} replace />;
   }
 
   return <>{children}</>;

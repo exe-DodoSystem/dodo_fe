@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DatePicker, Spin, Alert, Badge } from 'antd';
 import dayjs, { type Dayjs } from 'dayjs';
 import { getEmployeeDashboard } from '../../api/dashboard';
 import type { EmployeeDashboardData, MyTodayStatus, MyCurrentShift, MyLatestPayroll } from '../../types/dashboard';
 import { useRealtimeEvent } from '../../contexts/RealtimeContext';
+import { useAutoRefresh } from '../../hooks/useAutoRefresh';
 import { RT_EVENTS } from '../../api/realtime';
 
 const VND = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' });
@@ -20,16 +21,26 @@ function toVNTime(utcStr: string | null): string {
 
 const STATUS_LABEL: Record<string, string> = {
   Normal: 'Đúng giờ',
+  Present: 'Có mặt',
   Late: 'Đi trễ',
   EarlyLeave: 'Về sớm',
   MissingOut: 'Thiếu checkout',
+  Absent: 'Vắng mặt',
+  OnLeave: 'Nghỉ phép',
+  Holiday: 'Ngày lễ',
+  NoShift: 'Không có ca',
 };
 
 const STATUS_COLOR: Record<string, string> = {
   Normal: '#10b981',
+  Present: '#10b981',
   Late: '#f59e0b',
   EarlyLeave: '#6366f1',
   MissingOut: '#94a3b8',
+  Absent: '#ef4444',
+  OnLeave: '#0ea5e9',
+  Holiday: '#a855f7',
+  NoShift: '#94a3b8',
 };
 
 const PAYROLL_STATUS_LABEL: Record<number, string> = {
@@ -188,23 +199,30 @@ export default function EmployeeDashboard({ userName, tenantName }: { userName: 
   const [data, setData] = useState<EmployeeDashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [refreshKey, setRefreshKey] = useState(0);
   const navigate = useNavigate();
+  const reqIdRef = useRef(0);
 
-  useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
+  const fetchData = useCallback((silent = false) => {
+    const id = ++reqIdRef.current;
+    if (!silent) setLoading(true);
     setError(null);
-    getEmployeeDashboard(selectedMonth.month() + 1, selectedMonth.year())
-      .then((d) => { if (!cancelled) setData(d); })
-      .catch(() => { if (!cancelled) setError('Không thể tải dữ liệu dashboard.'); })
-      .finally(() => { if (!cancelled) setLoading(false); });
-    return () => { cancelled = true; };
-  }, [selectedMonth, refreshKey]);
+    return getEmployeeDashboard(selectedMonth.month() + 1, selectedMonth.year())
+      .then((d) => { if (id === reqIdRef.current) setData(d); })
+      .catch(() => { if (id === reqIdRef.current) setError('Không thể tải dữ liệu dashboard.'); })
+      .finally(() => { if (!silent && id === reqIdRef.current) setLoading(false); });
+  }, [selectedMonth]);
 
-  // Realtime: chấm công cập nhật / BE yêu cầu refresh dashboard
-  useRealtimeEvent(RT_EVENTS.ATTENDANCE_UPDATED, () => setRefreshKey((k) => k + 1));
-  useRealtimeEvent(RT_EVENTS.DASHBOARD_REFRESH, () => setRefreshKey((k) => k + 1));
+  useEffect(() => { fetchData(); }, [fetchData]);
+
+  // Realtime: chấm công / lịch ca / phiếu lương cập nhật → làm tươi widget (im lặng)
+  useRealtimeEvent(RT_EVENTS.ATTENDANCE_UPDATED, () => fetchData(true));
+  useRealtimeEvent(RT_EVENTS.DASHBOARD_REFRESH, () => fetchData(true));
+  useRealtimeEvent(RT_EVENTS.SHIFT_ASSIGNED, () => fetchData(true));
+  useRealtimeEvent(RT_EVENTS.PAYROLL_PUBLISHED, () => fetchData(true));
+  useRealtimeEvent(RT_EVENTS.PAYROLL_PAID, () => fetchData(true));
+  useRealtimeEvent(RT_EVENTS.BONUS_DEDUCTION_ENTRY_ADDED, () => fetchData(true));
+  // Fallback (SignalR best-effort): refetch khi tab visible trở lại / SignalR reconnect
+  useAutoRefresh(() => fetchData(true));
 
   const greeting = (() => {
     const h = new Date().getHours();

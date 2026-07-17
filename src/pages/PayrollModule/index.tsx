@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import './payroll.css';
 import { useAuth } from '../../contexts/AuthContext';
-import { getMyPayrolls } from '../../api/payroll';
+import { getMyPayrolls, CATEGORY_LABELS } from '../../api/payroll';
 import type { Payroll } from '../../api/payroll';
 import HRPayrollTab from './components/HRPayrollTab';
+import { useRealtimeEvent } from '../../contexts/RealtimeContext';
+import { RT_EVENTS } from '../../api/realtime';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -94,6 +96,24 @@ function PayrollDetailModal({ p, onClose }: { p: Payroll; onClose: () => void })
                 <span className="pay-row-label">Phạt đi trễ / về sớm</span>
                 <span className="pay-row-value minus">− {vnd(p.penaltyFee)}</span>
               </div>
+              {p.bonusEntries?.map((e) => (
+                <div className="pay-row" key={e.id}>
+                  <span className="pay-row-label">
+                    {CATEGORY_LABELS[e.category] ?? e.category}
+                    {e.reason ? ` — ${e.reason}` : ''}
+                  </span>
+                  <span className="pay-row-value plus">+ {vnd(e.amount)}</span>
+                </div>
+              ))}
+              {p.deductionEntries?.map((e) => (
+                <div className="pay-row" key={e.id}>
+                  <span className="pay-row-label">
+                    {CATEGORY_LABELS[e.category] ?? e.category}
+                    {e.reason ? ` — ${e.reason}` : ''}
+                  </span>
+                  <span className="pay-row-value minus">− {vnd(e.amount)}</span>
+                </div>
+              ))}
               {p.customBonus != null && p.customBonus > 0 && (
                 <div className="pay-row">
                   <span className="pay-row-label">Thưởng thủ công</span>
@@ -143,6 +163,7 @@ function MyPayrollView() {
   const [loading, setLoading]           = useState(true);
   const [error, setError]               = useState('');
   const [selected, setSelected]         = useState<Payroll | null>(null);
+  const [refreshKey, setRefreshKey]     = useState(0);
 
   const years = Array.from({ length: 4 }, (_, i) => currentYear - i);
 
@@ -159,7 +180,12 @@ function MyPayrollView() {
       })
       .catch(() => setError('Không thể tải phiếu lương. Vui lòng thử lại.'))
       .finally(() => setLoading(false));
-  }, [selectedYear]);
+  }, [selectedYear, refreshKey]);
+
+  // Realtime: phiếu lương của mình được chốt / thanh toán / điều chỉnh → làm tươi
+  useRealtimeEvent(RT_EVENTS.PAYROLL_PUBLISHED, () => setRefreshKey((k) => k + 1));
+  useRealtimeEvent(RT_EVENTS.PAYROLL_PAID, () => setRefreshKey((k) => k + 1));
+  useRealtimeEvent(RT_EVENTS.BONUS_DEDUCTION_ENTRY_ADDED, () => setRefreshKey((k) => k + 1));
 
   return (
     <div className="payroll-module">

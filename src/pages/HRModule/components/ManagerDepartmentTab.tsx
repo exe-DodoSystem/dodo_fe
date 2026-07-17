@@ -9,11 +9,12 @@ import {
 import type { Employee, Department } from '../../../api/hr';
 
 const MANAGER_ROLE_ID = 2;
+type ManagerEmployee = Employee & { userId: string };
 
 export default function ManagerDepartmentTab() {
-  const [managers, setManagers] = useState<Employee[]>([]);
+  const [managers, setManagers] = useState<ManagerEmployee[]>([]);
   const [allDepartments, setAllDepartments] = useState<Department[]>([]);
-  const [selectedManager, setSelectedManager] = useState<Employee | null>(null);
+  const [selectedManager, setSelectedManager] = useState<ManagerEmployee | null>(null);
   const [assignedDepts, setAssignedDepts] = useState<Department[]>([]);
 
   const [loadingManagers, setLoadingManagers] = useState(false);
@@ -31,7 +32,9 @@ export default function ManagerDepartmentTab() {
           getEmployees({ pageSize: 200, roleId: MANAGER_ROLE_ID }),
           getDepartments(),
         ]);
-        setManagers(empRes.items);
+        setManagers(
+          empRes.items.filter((employee): employee is ManagerEmployee => Boolean(employee.userId))
+        );
         setAllDepartments(deptRes);
       } catch {
         setError('Không thể tải dữ liệu. Vui lòng thử lại.');

@@ -6,6 +6,7 @@ import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { RealtimeProvider } from "./contexts/RealtimeContext";
 import { NotificationProvider } from "./contexts/NotificationContext";
+import RealtimeToaster from "./components/RealtimeToaster";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -13,6 +14,7 @@ createRoot(document.getElementById("root")!).render(
       <AuthProvider>
         <RealtimeProvider>
           <NotificationProvider>
+            <RealtimeToaster />
             <App />
           </NotificationProvider>
         </RealtimeProvider>

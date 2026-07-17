@@ -67,7 +67,10 @@ export interface MyTodayStatus {
   checkInTime: string | null;
   checkOutTime: string | null;
   checkInSelfieUrl: string | null;
-  status: 'Normal' | 'Late' | 'EarlyLeave' | 'MissingOut' | null;
+  status:
+    | 'Normal' | 'Late' | 'EarlyLeave' | 'MissingOut'
+    | 'Absent' | 'OnLeave' | 'Holiday' | 'NoShift' | 'Present'
+    | null;
   lateMinutes: number;
   earlyLeaveMinutes: number;
   actualWorkHours: number;

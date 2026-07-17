@@ -822,6 +822,9 @@
 .hr-pay-act-calc:hover    { background: #fefce8; border-color: #ca8a04; color: #ca8a04; }
 .hr-pay-act-publish:hover { background: #f0fdf4; border-color: #16a34a; color: #16a34a; }
 .hr-pay-act-paid:hover    { background: #eff6ff; border-color: #1d6ced; color: #1d6ced; }
+.hr-pay-act-entries:hover { background: #f5f3ff; border-color: #7c3aed; color: #7c3aed; }
+.hr-pay-act-delete:hover  { background: #fef2f2; border-color: #ef4444; color: #ef4444; }
+.hr-pay-act-delete:disabled { opacity: 0.5; cursor: not-allowed; }
 
 /* ─── Pagination ──────────────────────────────────────────────────────────── */
 

@@ -254,20 +254,20 @@ export async function saveAttendanceSetting(
 }
 
 export async function getHolidays(): Promise<PublicHoliday[]> {
-  const res = await axiosClient.get<{ data: PublicHoliday[] }>('/api/v1/attendance/holidays');
-  return res.data.data;
+  const res = await axiosClient.get<PublicHoliday[] | { data: PublicHoliday[] }>('/api/hr/holidays');
+  return Array.isArray(res.data) ? res.data : res.data.data;
 }
 
 export async function createHoliday(payload: CreateHolidayRequest): Promise<PublicHoliday> {
-  const res = await axiosClient.post<{ data: PublicHoliday; message: string }>(
-    '/api/v1/attendance/holidays',
+  const res = await axiosClient.post<PublicHoliday | { data: PublicHoliday; message?: string }>(
+    '/api/hr/holidays',
     payload
   );
-  return res.data.data;
+  return 'data' in res.data ? res.data.data : res.data;
 }
 
 export async function deleteHoliday(id: string): Promise<void> {
-  await axiosClient.delete(`/api/v1/attendance/holidays/${id}`);
+  await axiosClient.delete(`/api/hr/holidays/${id}`);
 }
 
 export async function recalculateAttendance(
